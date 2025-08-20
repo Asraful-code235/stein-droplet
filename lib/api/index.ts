@@ -1,0 +1,1118 @@
+function getAssetUrl(path: string) {
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL?.replace("/api", "")}${path}`;
+}
+
+function getAuthHeaders(): Record<string, string> {
+  const token = process.env.STRAPI_API_TOKEN || process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
+  if (token) {
+    return { Authorization: `Bearer ${token}` };
+  }
+  return {};
+}
+
+function getApiBase(): string {
+  const base = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "";
+  if (!base) return "";
+  try {
+    const u = new URL(base);
+    // strip any query/hash and normalize pathname
+    const pathname = u.pathname.endsWith("/api")
+      ? u.pathname
+      : (u.pathname.replace(/\/$/, "") + "/api");
+    return `${u.protocol}//${u.host}${pathname}`;
+  } catch {
+    // fallback if base isn't a full URL
+    const noQuery = base.split("?")[0].split("#")[0];
+    if (noQuery.endsWith("/api")) return noQuery;
+    return noQuery.replace(/\/$/, "") + "/api";
+  }
+}
+export async function getVisionData(locale: any) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pages?locale=${locale}`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch Growth content");
+
+  const data = await res.json();
+
+  const iconDetailsSection = data?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.icon-details"
+  );
+
+  if (!iconDetailsSection) {
+    return {
+      name: [],
+      backgroundImage: null,
+      contentSection: null,
+    };
+  }
+
+  const { name, backgroundImage, contentSection } = iconDetailsSection;
+
+  return { name, backgroundImage, contentSection };
+}
+
+export async function getHeroData(locale: any) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch Growth content");
+
+  const data = await res.json();
+  const page = data?.data?.[0];
+
+  // Step 2: Access the sections array
+  const sections = page?.Sections || [];
+
+  // Step 3: Find the "common.main-banner" component
+  const mainBanner = sections.find(
+    (section: any) => section.__component === "common.main-banner"
+  );
+
+  // Step 4: Extract relevant data
+  const heroSection = mainBanner?.HeroSection?.[0] || null;
+  const videoUrl = mainBanner?.backgroundVideo?.url
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${mainBanner.backgroundVideo.url}`
+    : null;
+
+  const buttonOneTitle = mainBanner?.buttonOneTitle || "";
+  const buttonTwoTitle = mainBanner?.buttonTwoTitle || "";
+
+  return {
+    heroSection,
+    videoUrl,
+    buttonOneTitle,
+    buttonTwoTitle,
+  };
+}
+
+export async function getAllCategories(locale: any) {
+  // 1️⃣ Read from env
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+  const [productsRes, pagesRes] = await Promise.all([
+    fetch(`${apiURL}/categories?locale=${locale}&populate=backgroundImage`),
+    fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
+  ]);
+  // 3️⃣ Error-check
+  if (!productsRes.ok) {
+    throw new Error(`Products fetch failed: ${productsRes.statusText}`);
+  }
+  if (!pagesRes.ok) {
+    throw new Error(`Pages fetch failed: ${pagesRes.statusText}`);
+  }
+
+  // 4️⃣ JSON-parse in parallel
+  const [{ data: productsData }, { data: pagesData }] = await Promise.all([
+    productsRes.json(),
+    pagesRes.json(),
+  ]);
+
+  // 5️⃣ Extract premium-products info
+  const page = pagesData[0];
+  const premiumSection = page?.Sections.find(
+    (sec: any) => sec.__component === "common.premium-products"
+  );
+  const details = {
+    premiumBackgroundImage: premiumSection?.backgroundImage?.url
+      ? `${assetURL}${premiumSection.backgroundImage.url}`
+      : null,
+    premiumDetails: {
+      title: premiumSection?.commonSection?.title ?? "No title",
+      subTitle: premiumSection?.commonSection?.subTitle ?? "No subtitle",
+      description:
+        premiumSection?.commonSection?.description ?? "No description",
+    },
+  };
+
+  // 6️⃣ Shape categories array with backgroundImage
+  const categories = productsData.map((category: any) => ({
+    id: category.id,
+    title: category.name,
+    slug: category?.slug,
+    description: category.description,
+    documentId: category.documentId,
+    createdAt: category.createdAt,
+    updatedAt: category.updatedAt,
+    publishedAt: category.publishedAt,
+    backgroundImage: category.backgroundImage?.url
+      ? `${assetURL}${category.backgroundImage.url}`
+      : null,
+    backgroundImageAlt: category.backgroundImage?.alternativeText || "",
+    backgroundImageName: category.backgroundImage?.name || "",
+  }));
+  return {
+    details,
+    categories,
+  };
+}
+
+export async function getDiscoveryData(locale: string) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const [discoveryRes] = await Promise.all([
+    fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
+  ]);
+
+  // ✅ Parse JSON
+  const discoveryJson = await discoveryRes.json();
+
+  // ✅ Find the discovery section
+  const discoveryData = discoveryJson?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.discovery-section"
+  );
+
+  const discoveryContent = {
+    title: discoveryData?.DiscoverySection?.title || "",
+    subTitle: discoveryData?.DiscoverySection?.subTitle || "",
+    description: discoveryData?.DiscoverySection?.description || "",
+    backgroundImage: discoveryData?.backgroundImage?.url
+      ? assetURL + discoveryData.backgroundImage.url
+      : "",
+  };
+
+  return { discoveryContent };
+}
+
+export async function projectShowcaseData(locale: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const [res, resImages] = await Promise.all([
+    fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
+    fetch(
+      `${apiURL}/galleries?populate[card][populate]=backgroundImage&locale=${locale}`
+    ),
+  ]);
+
+  if (!res?.ok || !resImages?.ok) {
+    throw new Error("Failed to fetch data");
+  }
+
+  const json = await res.json();
+  const json1 = await resImages.json();
+
+  const showcaseSection = json?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.project-showcase"
+  );
+
+  const cards = json1?.data?.flatMap((entry: any) =>
+    entry.card.map((card: any) => ({
+      id: card.id,
+      title: card.title,
+      description: card.description,
+      height: card.height,
+      backgroundImage: card.backgroundImage?.url
+        ? `${assetURL}${card.backgroundImage.url}`
+        : null,
+    }))
+  );
+
+  return {
+    title: showcaseSection?.title || "",
+    description: showcaseSection?.description || "",
+    images: cards || [],
+  };
+}
+
+export async function getProductsByCategorySlug({ categorySlug, locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const res = await fetch(
+    `${apiURL}/products?filters[category][slug][$eq]=${categorySlug}&locale=${locale}&populate=*`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  const json = await res.json();
+
+  const products =
+    json?.data?.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
+      price: item.price,
+      description: item.description,
+
+      image: item.backgroundImage?.formats?.thumbnail?.url
+        ? assetURL + item.backgroundImage.formats.thumbnail.url
+        : null,
+
+      category: item.category?.name,
+      categorySlug: item.category?.slug,
+
+      // ✅ Variations cleaned up
+      // variations: item.variations?.map((variation: any) => ({
+      //   label: variation.label?.trim(),
+      //   values: Array.isArray(variation.value)
+      //     ? variation.value.map((v: any) => v.value)
+      //     : [],
+      // })) || [],
+
+      // ✅ Catalogue
+      catalogue: item.catalogue
+        ? {
+            title: item.catalogue.title,
+            fileUrl: item.catalogue.file?.url
+              ? assetURL + item.catalogue.file.url
+              : null,
+          }
+        : null,
+    })) || [];
+
+  console.dir(products, { depth: null });
+  return products;
+}
+
+export async function getAllProducts({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const res = await fetch(`${apiURL}/products?locale=${locale}&populate=*`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  const json = await res.json();
+
+  const products =
+    json?.data?.map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
+      price: item.price,
+      description: item.description,
+
+      image:
+        Array.isArray(item.backgroundImage) &&
+        item.backgroundImage.length > 0 &&
+        item.backgroundImage[0].formats?.thumbnail?.url
+          ? assetURL + item.backgroundImage[0].formats.thumbnail.url
+          : null,
+
+      category: item.category?.name,
+      categorySlug: item.category?.slug,
+
+      catalogue: item.catalogue
+        ? {
+            title: item.catalogue.title,
+            fileUrl: item.catalogue.file?.url
+              ? assetURL + item.catalogue.file.url
+              : null,
+          }
+        : null,
+    })) || [];
+
+  return products;
+}
+
+export async function getAllColors({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const res = await fetch(`${apiURL}/colors?locale=${locale}&populate=*`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  const json = await res.json();
+  const Colors = json?.data?.map(({ id, value }: any) => ({
+    id,
+    value,
+  }));
+
+  return Colors;
+}
+
+export async function getAllSizes({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+
+  const res = await fetch(`${apiURL}/sizes?locale=${locale}&populate=*`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  const json = await res.json();
+
+  const Sizes = json?.data?.map(({ id, size }: any) => ({
+    id,
+    value: size,
+  }));
+
+  return Sizes;
+}
+
+export async function getAllThickness({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const res = await fetch(`${apiURL}/thicknesses?locale=${locale}&populate=*`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  const json = await res.json();
+
+  const Thickness = json?.data.map(({ id, value }: any) => ({
+    id,
+    value,
+  }));
+
+  return Thickness;
+}
+export async function getFilteredProducts({
+  locale,
+  selectedFilters,
+  category,
+}: {
+  selectedFilters: {
+    Colors: string[];
+    Sizes: string[];
+    Thickness: string[];
+    Collection: string[];
+  };
+  locale: string;
+  category: string | null;
+}) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const queryParts: string[] = [];
+
+  // Colors filter
+  if (selectedFilters.Colors.length) {
+    queryParts.push(
+      `filters[variations][colors][value][$in]=${selectedFilters.Colors.map(
+        encodeURIComponent
+      ).join(",")}`
+    );
+  }
+
+  // Sizes filter (fixed nested path: sizes inside sizes)
+  if (selectedFilters.Sizes.length) {
+    queryParts.push(
+      `filters[variations][sizes][sizes][size][$in]=${selectedFilters.Sizes.map(
+        encodeURIComponent
+      ).join(",")}`
+    );
+  }
+
+  // Thickness filter
+  if (selectedFilters.Thickness.length) {
+    queryParts.push(
+      `filters[variations][thicknesses][value][$in]=${selectedFilters.Thickness.map(
+        encodeURIComponent
+      ).join(",")}`
+    );
+  }
+
+  // Collection filter (category name) — changed $eq to $in to support multiple selections
+  if (selectedFilters.Collection.length) {
+    queryParts.push(
+      `filters[category][name][$in]=${selectedFilters.Collection.map(
+        encodeURIComponent
+      ).join(",")}`
+    );
+  }
+
+  if (category) {
+    queryParts.push(
+      `filters[category][slug][$eq]=${encodeURIComponent(category)}`
+    );
+  }
+
+  // Combine all filters
+  const filterQuery = queryParts.length ? `&${queryParts.join("&")}` : "";
+
+  // Final URL with filters and populate params
+  const fullUrl = `${apiURL}/products?locale=${locale}${filterQuery}&populate[variations][populate][sizes]=true&populate[variations][populate][colors]=true&populate[variations][populate][thicknesses]=true&populate[category]=true&populate[backgroundImage]=true&populate[catalogue][populate][file]=true`;
+
+  const res = await fetch(fullUrl);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch filtered products");
+  }
+
+  const json = await res.json();
+
+  return json?.data || [];
+}
+
+export async function getLayoutData(locale: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+
+  const res = await fetch(
+    `${apiURL}/skeletons?populate[header][populate]=*&populate[footer][populate]=*&populate[logo][populate]=*&locale=${locale}`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch layout data");
+  }
+
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+  const json = await res.json();
+
+  // Get first layout item
+  const layoutData = Array.isArray(json?.data) ? json.data[0] : json?.data;
+
+  if (!layoutData) return null;
+
+  const {
+    id,
+    documentId,
+    createdAt,
+    updatedAt,
+    publishedAt,
+    locale: layoutLocale,
+    header = [],
+    footer = [],
+    logo = [],
+  } = layoutData;
+
+  const headerItem =
+    Array.isArray(header) && header.length > 0 ? header[0] : null;
+  const headerLinks = headerItem?.headerLinks ?? [];
+
+  // ✅ Properly extract footer item
+  const footerItem =
+    Array.isArray(footer) && footer.length > 0 ? footer[0] : null;
+
+  const logoItem =
+    Array.isArray(logo) && logo.length > 0 ? logo[0]?.logo : null;
+
+  const formattedLogo = logoItem
+    ? {
+        ...logoItem,
+        url: `${assetURL}${logoItem.url}`,
+      }
+    : null;
+
+  return {
+    id,
+    documentId,
+    createdAt,
+    updatedAt,
+    publishedAt,
+    locale: layoutLocale,
+    headerLinks,
+    footer: {
+      tagline: footerItem?.tagline || "",
+      copyrightText: footerItem?.copyrightText || "",
+      logoName: footerItem?.logoName || "",
+      quickLinks: footerItem?.quickLinks ?? [],
+      materialLinks: footerItem?.materialLinks ?? [],
+      legalLinks: footerItem?.legalLinks ?? [],
+      contactInfo: footerItem?.contactInfo ?? {},
+    },
+    logo: formattedLogo,
+  };
+}
+
+export async function getRequestFormData({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const res = await fetch(
+    `${apiURL}/request-form?locale=${locale}&populate=formTitle,fieldName`
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch request form data");
+  }
+
+  const json = await res.json();
+  const data = json;
+
+  if (!data) {
+    throw new Error("No form data found");
+  }
+
+  const { id, documentId, createdAt, updatedAt, formTitle, fieldName } = data;
+
+  return {
+    id,
+    documentId,
+    createdAt,
+    updatedAt,
+    formTitle: {
+      id: formTitle.id,
+      title: formTitle.title,
+      subTitle: formTitle.subTitle,
+      description: formTitle.description,
+    },
+    fields: Array.isArray(fieldName)
+      ? fieldName.map((f: any) => ({
+          id: f.id,
+          name: f.name,
+        }))
+      : [],
+  };
+}
+
+export async function SendMessageFormData({ locale }: { locale: string }) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const res = await fetch(
+    `${apiURL}/request-form?locale=${locale}&populate=formTitle,fieldName`
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch request form data");
+  }
+
+  const json = await res.json();
+  const data = json;
+
+  if (!data) {
+    throw new Error("No form data found");
+  }
+
+  const { id, documentId, createdAt, updatedAt, formTitle, fieldName } = data;
+
+  return {
+    id,
+    documentId,
+    createdAt,
+    updatedAt,
+    formTitle: {
+      id: formTitle.id,
+      title: formTitle.title,
+      subTitle: formTitle.subTitle,
+      description: formTitle.description,
+    },
+    fields: Array.isArray(fieldName)
+      ? fieldName.map((f: any) => ({
+          id: f.id,
+          name: f.name,
+        }))
+      : [],
+  };
+}
+
+export async function getProjectsData({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+
+  const [projectsRes, galleriesRes] = await Promise.all([
+    fetch(`${apiURL}/projects?locale=${locale}&populate=*`),
+    fetch(
+      `${apiURL}/galleries?populate[card][populate]=backgroundImage&locale=${locale}`
+    ),
+  ]);
+
+  if (!projectsRes.ok || !galleriesRes.ok) {
+    throw new Error("Failed to fetch data");
+  }
+
+  const projectsJson = await projectsRes.json();
+  const galleriesJson = await galleriesRes.json();
+
+  // ✅ Extract all cards from galleries
+  const galleryCards =
+    galleriesJson?.data?.flatMap((gallery: any) => gallery?.card || []) || [];
+
+  // ✅ Optional: Map cards to include only required fields
+  const cards = galleryCards.map((card: any) => ({
+    id: card.id,
+    title: card.title,
+    description: card.description,
+    height: card.height,
+    backgroundImage: card.backgroundImage?.url
+      ? getAssetUrl(card.backgroundImage.url)
+      : null,
+  }));
+
+  return {
+    projectsHeading: projectsJson?.data?.[0]?.heading || "",
+    galleryCards: cards,
+  };
+}
+
+// New helpers for Projects (aligned with Projects API update)
+export type ProjectListItem = {
+  id: number;
+  title: string;
+  mainImageUrl?: string | null;
+};
+
+export type ProjectGalleryImage = {
+  id: number;
+  url: string;
+  alternativeText?: string | null;
+};
+
+export async function getAllProjects({ locale }: { locale: string }) {
+  const apiURL = getApiBase();
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  if (!apiURL) throw new Error("Missing NEXT_PUBLIC_BACKEND_URL or NEXT_PUBLIC_API_URL");
+
+  const urlWithLocale = `${apiURL}/projects?locale=${encodeURIComponent(locale)}`;
+  let res = await fetch(urlWithLocale, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) {
+    // Fallback: try without locale (in case the content-type isn't i18n-enabled)
+    const urlNoLocale = `${apiURL}/projects`;
+    const retry = await fetch(urlNoLocale, {
+      headers: { ...getAuthHeaders() },
+      next: { revalidate: 60 },
+    });
+    if (!retry.ok) {
+      let msg = "";
+      try { msg = await retry.text(); } catch {}
+      throw new Error(
+        `Failed to fetch projects: ${retry.status} ${retry.statusText} @ ${urlNoLocale} ${msg ? "- " + msg : ""}`
+      );
+    }
+    res = retry;
+  }
+  const json = await res.json();
+
+  const items: ProjectListItem[] = (json?.data || []).map((item: any) => {
+    const node = item.attributes ?? item;
+    const heading = node.heading ?? {};
+    const title = heading.title ?? node.title ?? "";
+    const subTitle = heading.subTitle ?? "";
+    const description = heading.description ?? "";
+    // Support both shapes:
+    // 1) mainImage: { url: "/uploads/..." }
+    // 2) mainImage: { data: { attributes: { url: "/uploads/..." } } }
+    let mainImageUrl: string | null = null;
+    const mainImage = heading?.mainImage ?? node?.mainImage;
+    if (mainImage) {
+      if (typeof mainImage.url === "string") {
+        mainImageUrl = assetURL + mainImage.url;
+      } else if (mainImage.data) {
+        const u = mainImage.data?.attributes?.url || mainImage.data?.url;
+        if (u) mainImageUrl = assetURL + u;
+      }
+    }
+    return { id: item.id, title, subTitle, description, mainImageUrl };
+  });
+
+  return items;
+}
+
+export async function getProjectByCategoryTitle({
+  locale,
+  categoryTitle,
+}: {
+  locale: string;
+  categoryTitle: string;
+}) {
+  const apiURL = getApiBase();
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  if (!apiURL) throw new Error("Missing NEXT_PUBLIC_BACKEND_URL or NEXT_PUBLIC_API_URL");
+
+  const urlWithLocale = `${apiURL}/projects?locale=${encodeURIComponent(
+    locale
+  )}&filters[heading][title][$eq]=${encodeURIComponent(categoryTitle)}`;
+  let res = await fetch(urlWithLocale, {
+    headers: {
+      ...getAuthHeaders(),
+    },
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) {
+    const urlNoLocale = `${apiURL}/projects?filters[heading][title][$eq]=${encodeURIComponent(categoryTitle)}`;
+    const retry = await fetch(urlNoLocale, {
+      headers: { ...getAuthHeaders() },
+      next: { revalidate: 60 },
+    });
+    if (!retry.ok) {
+      let msg = "";
+      try { msg = await retry.text(); } catch {}
+      throw new Error(
+        `Failed to fetch project by title: ${retry.status} ${retry.statusText} @ ${urlNoLocale} ${msg ? "- " + msg : ""}`
+      );
+    }
+    res = retry;
+  }
+  const json = await res.json();
+  const item = json?.data?.[0];
+  if (!item) return null;
+
+  const node = item.attributes ?? item;
+  const rawGallery = node.gallery ?? node.gallery?.data ?? [];
+  let galleryArray: any[] = [];
+  if (Array.isArray(rawGallery)) {
+    galleryArray = rawGallery;
+  } else if (rawGallery?.data && Array.isArray(rawGallery.data)) {
+    galleryArray = rawGallery.data;
+  }
+  const gallery: ProjectGalleryImage[] = galleryArray.map((m: any) => {
+    const url = m?.url || m?.attributes?.url || "";
+    const alt = m?.alternativeText ?? m?.attributes?.alternativeText ?? null;
+    return { id: m.id, url: url ? assetURL + url : "", alternativeText: alt };
+  });
+
+  return {
+    id: item.id,
+    title: (node.heading?.title ?? node.title ?? "") as string,
+    subTitle: (node.heading?.subTitle ?? "") as string,
+    description: (node.heading?.description ?? "") as string,
+    gallery,
+  };
+}
+
+export async function getCatalogueBySlug({ locale, category }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+
+  const url = `${apiURL}/catalogues?locale=${locale}&filters[category][slug][$eq]=${category}&populate=*`;
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch catalogue");
+  }
+
+  const data = await res.json();
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+  const transformedCollections = data?.data?.map((item: any) => {
+    return {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      features: item.KeyFeatures?.map((kf: any) => kf.option) || [],
+      image: item.thumbnail ? assetURL + item.thumbnail.url : "/placeholder.jpg", // fallback image
+      fileUrl: item.file?.url ? assetURL + item.file.url : null,
+    };
+  });
+  return transformedCollections;
+}
+
+export async function getAboutUsData(locale: string) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+
+  const res = await fetch(
+    `${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch About Us content");
+
+  const data = await res.json();
+
+  const aboutSection = data?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.about-us"
+  );
+  if (!aboutSection) return null;
+
+  const headingData = aboutSection.heading?.[0] || {};
+  const title = headingData.title || "";
+  const subTitle = headingData.subTitle || "";
+  const description = headingData.description || "";
+
+  const image = aboutSection.backgroundImage?.url
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${aboutSection.backgroundImage.url}`
+    : null;
+
+  return {
+    title,
+    subTitle,
+    description,
+    image,
+  };
+}
+
+
+
+export async function getCollectionData({ locale }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+
+  const res = await fetch(
+    `${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch Growth content");
+
+  const data = await res.json();
+
+  const collectionSectionDetails = data?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.collections-section"
+  );
+
+  if (!collectionSectionDetails) return null;
+
+  const {
+    id: sectionId,
+    CollectionComponent: {
+      id: collectionComponentId,
+      title,
+      subTitle,
+      description,
+    } = {},
+    backgroundImage: {
+      id: bgImageId,
+      name,
+      url = "",
+      alternativeText,
+      caption,
+      width,
+      height,
+      formats,
+      ext,
+      mime,
+      size,
+    } = {},
+    cards = [],
+  } = collectionSectionDetails;
+
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const assetUrl = `${assetURL}${url}`;
+
+  return {
+    sectionId,
+    collectionComponent: {
+      id: collectionComponentId,
+      title,
+      subTitle,
+      description,
+    },
+    backgroundImage: {
+      id: bgImageId,
+      name,
+      assetUrl,
+      alternativeText,
+      caption,
+      width,
+      height,
+      formats,
+      ext,
+      mime,
+      size,
+    },
+  };
+}
+
+export async function getAllCollections(locale: string) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  // 1️⃣ Fetch both collections and pages (with i18n)
+  const [collectionsRes] = await Promise.all([
+    fetch(`${apiURL}/collections?locale=${locale}&populate=backgroundImage`),
+  ]);
+
+  // 2️⃣ Error handling
+  if (!collectionsRes.ok) {
+    throw new Error(`Failed to fetch data: ${collectionsRes.statusText}`);
+  }
+
+  const collectionsData = await collectionsRes.json();
+
+  // 3️⃣ Extract premium-products section
+
+  // 4️⃣ Normalize collections
+  const collections = collectionsData?.data?.map((item: any) => {
+    const image = item?.backgroundImage || item?.attributes?.backgroundImage;
+
+    return {
+      id: item.id,
+      title: item.name || item.attributes?.name,
+      slug: item.slug || item.attributes?.slug,
+      description: item.description || item.attributes?.description,
+      documentId: item.documentId || item.attributes?.documentId,
+      createdAt: item.createdAt || item.attributes?.createdAt,
+      updatedAt: item.updatedAt || item.attributes?.updatedAt,
+      publishedAt: item.publishedAt || item.attributes?.publishedAt,
+      backgroundImage: image?.url ? `${assetURL}${image.url}` : null,
+      backgroundImageAlt: image?.alternativeText || "",
+      backgroundImageName: image?.name || "",
+    };
+  });
+
+  return {
+    collections,
+  };
+}
+
+export async function getProductById({ locale, id }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+  const res = await fetch(
+    `${apiURL}/products/${id}?locale=${locale}&populate=*`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch product");
+  }
+
+  const { data } = await res.json();
+
+  const {
+    id: productId,
+    name,
+    slug,
+    description,
+    price,
+    category,
+    variations,
+    backgroundImage,
+    catalogue,
+  } = data;
+
+  // Add assetURL to each image and its formats
+  const backgroundImageWithFullUrls = backgroundImage.map((img: any) => ({
+    ...img,
+    url: assetURL + img.url,
+    formats: Object.fromEntries(
+      Object.entries(img.formats || {}).map(([key, format]: [string, any]) => [
+        key,
+        {
+          ...format,
+          url: assetURL + format.url,
+        },
+      ])
+    ),
+  }));
+
+  // Prepend assetURL to catalogue file if it exists
+  const updatedCatalogue = catalogue?.file
+    ? {
+        ...catalogue,
+        file: {
+          ...catalogue.file,
+          url: assetURL + catalogue.file.url,
+        },
+      }
+    : catalogue;
+
+  return {
+    id: productId,
+    name,
+    slug,
+    description,
+    price,
+    category,
+    variations,
+    backgroundImage: backgroundImageWithFullUrls,
+    catalogue: updatedCatalogue,
+  };
+}
+
+export async function getInTouchHeadingData({ locale }: any) {
+  const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL; // e.g. "http://127.0.0.1:1337/api"
+  const res = await fetch(
+    `${apiURL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
+  );
+
+  if (!res.ok) throw new Error("Failed to fetch Growth content");
+
+  const data = await res.json();
+  const getInTouchSectionDetails = data?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.get-in-touch"
+  );
+
+  return getInTouchSectionDetails;
+}
+
+export async function getCatalogueHeadingData({ locale }: any) {
+  const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL; // e.g. "http://127.0.0.1:1337/api"
+  const res = await fetch(
+    `${apiURL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch Catalogue heading content");
+  }
+
+  const data = await res.json();
+
+  const catalogueSectionDetails = data?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.catalogue-heading"
+  );
+
+  if (!catalogueSectionDetails) return null;
+
+  const {
+    id: sectionId,
+    catalogueHeading: [
+      { id: headingId, title = "", subTitle = "", description = "" } = {},
+    ] = [],
+  } = catalogueSectionDetails;
+
+  return {
+    sectionId,
+    heading: {
+      id: headingId,
+      title,
+      subTitle,
+      description,
+    },
+  };
+}
+
+export async function getImpressumData({ locale }: any) {
+  const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const res = await fetch(
+    `${apiURL}/api/impressum?populate[impressumContactDetails]=*&locale=${locale}`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch direct contact content");
+  }
+
+  const data = await res.json();
+  return data;
+}
+
+export async function getDirectContactData({ locale }: any) {
+  const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  // First fetch - DO NOT CHANGE
+  const res = await fetch(
+    `${apiURL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch direct contact content");
+  }
+
+  const data = await res.json();
+
+  const directSection = data?.data?.[0]?.Sections?.find(
+    (section: any) => section.__component === "common.direct-contact"
+  );
+
+  if (!directSection) return null;
+
+  const {
+    id: sectionId,
+    directContactComponentHeading: {
+      id: headingId,
+      title = "",
+      subTitle = "",
+      description = "",
+    } = {},
+  } = directSection;
+
+
+
+  const contactRes = await fetch(`${apiURL}/api/contact?populate[contactDetails][populate]=icon`);
+
+
+
+  if (!contactRes.ok) {
+    throw new Error("Failed to fetch contact card details");
+  }
+
+  const contactData = await contactRes.json();
+
+  const contactCards = contactData?.data?.contactDetails || [];
+  return {
+    sectionId,
+    heading: {
+      id: headingId,
+      title,
+      subTitle,
+      description,
+    },
+    contactCards,
+  };
+}
