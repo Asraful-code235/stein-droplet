@@ -46,20 +46,16 @@ const ProjectGallery = ({
                 {col.map((img) => (
                   <div
                     key={img.id}
-                    className="group relative  h-[400px] overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-500"
+                    className="group relative  h-[400px] overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-500 ease-in"
                   >
-                    <div className="absolute inset-0 group overflow-hidden transition-all duration-500 ease-in-out">
+                    <div className="absolute inset-0 group overflow-hidden">
                       <Image
                         src={img.url}
                         alt={img.alternativeText || "Project Image"}
                         fill
                         className="object-cover group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                        <span className="text-white text-lg font-medium">
-                          {/* {title || "View Project"} */}
-                        </span>
-                      </div>
+                     
                     </div>
                   </div>
                 ))}
@@ -102,9 +98,9 @@ const ProjectGallery = ({
                         fill
                         className="object-cover group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent flex flex-col justify-end p-6 transition-opacity duration-500">
                         <span className="text-white text-lg font-medium">
-                          {/* {title || "View Project"} */}
+                          {project?.title || "View Project"}
                         </span>
                       </div>
                     </Link>

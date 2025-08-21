@@ -15,25 +15,28 @@ async function ProductsPageComponent() {
   const params = useParams();
   const category = searchParams.get("category");
 
-  const colors = await getAllColors({ locale: params.locale });
-  const thicknesses = await getAllThickness({ locale: params.locale });
+  // Ensure locale is a string
+  const locale = Array.isArray(params.locale) ? params.locale[0] : params.locale;
 
-  const sizes = await getAllSizes({ locale: params.locale });
+  const colors = await getAllColors({ locale });
+  const thicknesses = await getAllThickness({ locale });
+
+  const sizes = await getAllSizes({ locale });
   let products;
   if (category) {
     products = await getProductsByCategorySlug({
-      locale: params.locale,
+      locale,
       categorySlug: category,
     });
   } else {
-    products = await getAllProducts({ locale: params.locale });
+    products = await getAllProducts({ locale });
   }
 
   return (
     <Products
       colors={colors}
       category={category}
-      locale={params?.locale}
+      locale={locale}
       sizes={sizes}
       thickness={thicknesses}
       initialProducts={products}

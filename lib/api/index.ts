@@ -222,111 +222,145 @@ export async function getProductsByCategorySlug({ categorySlug, locale }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  const res = await fetch(
-    `${apiURL}/products?filters[category][slug][$eq]=${categorySlug}&locale=${locale}&populate=*`
-  );
+  try {
+    // Use the categories endpoint with slug filter to get the category and its products
+    const url = `${apiURL}/categories?locale=${locale}&filters[slug][$eq]=${encodeURIComponent(categorySlug)}&populate[products][populate][mainImage]=*&populate[products][populate][gallery]=*&populate[products][populate][variations][populate][sizes][populate][sizes]=*&populate[products][populate][variations][populate][colors]=*&populate[products][populate][variations][populate][thicknesses]=*`;
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    console.log("Fetching category with products from:", url);
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Categories API Error Response:", errorText);
+      throw new Error(`Failed to fetch category: ${res.status} ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    console.log("Category API Response:", json);
+
+    if (!json.data || json.data.length === 0) {
+      console.warn("No category found for slug:", categorySlug);
+      return [];
+    }
+
+    const category = json.data[0];
+    const products = category.products || [];
+
+    console.log(`Found ${products.length} products for category: ${categorySlug}`);
+
+    return products.map((product: any) => {
+      const mainImage = product.mainImage;
+      const gallery = product.gallery || [];
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        description: product.description,
+        image: mainImage?.url ? `${assetURL}${mainImage.url}` : null,
+        gallery: gallery.map((img: any) => ({
+          url: img.url ? `${assetURL}${img.url}` : null,
+          alternativeText: img.alternativeText || '',
+          width: img.width,
+          height: img.height,
+        })),
+        category: category.name,
+        categorySlug: category.slug,
+        variations: product.variations || [],
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    return [];
   }
-
-  const json = await res.json();
-
-  const products =
-    json?.data?.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      slug: item.slug,
-      price: item.price,
-      description: item.description,
-
-      image: item.backgroundImage?.formats?.thumbnail?.url
-        ? assetURL + item.backgroundImage.formats.thumbnail.url
-        : null,
-
-      category: item.category?.name,
-      categorySlug: item.category?.slug,
-
-      // ✅ Variations cleaned up
-      // variations: item.variations?.map((variation: any) => ({
-      //   label: variation.label?.trim(),
-      //   values: Array.isArray(variation.value)
-      //     ? variation.value.map((v: any) => v.value)
-      //     : [],
-      // })) || [],
-
-      // ✅ Catalogue
-      catalogue: item.catalogue
-        ? {
-            title: item.catalogue.title,
-            fileUrl: item.catalogue.file?.url
-              ? assetURL + item.catalogue.file.url
-              : null,
-          }
-        : null,
-    })) || [];
-
-  console.dir(products, { depth: null });
-  return products;
 }
 
-export async function getAllProducts({ locale }: any) {
+export async function getAllProducts({ locale }: { locale: string }) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  const res = await fetch(`${apiURL}/products?locale=${locale}&populate=*`);
+  try {
+    // Get all categories with their products instead of using the broken products endpoint
+    const url = `${apiURL}/categories?locale=${locale}&populate[products][populate][mainImage]=*&populate[products][populate][gallery]=*&populate[products][populate][variations][populate][sizes][populate][sizes]=*&populate[products][populate][variations][populate][colors]=*&populate[products][populate][variations][populate][thicknesses]=*`;
+    console.log("Fetching all products via categories from:", url);
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Categories API Error Response:", errorText);
+      throw new Error(`Failed to fetch categories: ${res.status} ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    console.log("All categories with products API Response:", json);
+
+    if (!json.data) {
+      console.warn("No data in API response for categories");
+      return [];
+    }
+
+    // Flatten all products from all categories
+    const allProducts: any[] = [];
+    json.data.forEach((category: any) => {
+      if (category.products && category.products.length > 0) {
+        category.products.forEach((product: any) => {
+          allProducts.push({
+            ...product,
+            category: category.name,
+            categorySlug: category.slug,
+          });
+        });
+      }
+    });
+
+    console.log(`Found ${allProducts.length} total products across all categories`);
+
+    return allProducts.map((product: any) => {
+      const mainImage = product.mainImage;
+      const gallery = product.gallery || [];
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        description: product.description,
+        image: mainImage?.url ? `${assetURL}${mainImage.url}` : null,
+        gallery: gallery.map((img: any) => ({
+          url: img.url ? `${assetURL}${img.url}` : null,
+          alternativeText: img.alternativeText || '',
+          width: img.width,
+          height: img.height,
+        })),
+        category: product.category,
+        categorySlug: product.categorySlug,
+        variations: product.variations || [],
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching all products:", error);
+    return [];
   }
-
-  const json = await res.json();
-
-  const products =
-    json?.data?.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      slug: item.slug,
-      price: item.price,
-      description: item.description,
-
-      image:
-        Array.isArray(item.backgroundImage) &&
-        item.backgroundImage.length > 0 &&
-        item.backgroundImage[0].formats?.thumbnail?.url
-          ? assetURL + item.backgroundImage[0].formats.thumbnail.url
-          : null,
-
-      category: item.category?.name,
-      categorySlug: item.category?.slug,
-
-      catalogue: item.catalogue
-        ? {
-            title: item.catalogue.title,
-            fileUrl: item.catalogue.file?.url
-              ? assetURL + item.catalogue.file.url
-              : null,
-          }
-        : null,
-    })) || [];
-
-  return products;
 }
 
 export async function getAllColors({ locale }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
-  const assetURL = apiURL.replace(/\/api\/?$/, "");
 
   const res = await fetch(`${apiURL}/colors?locale=${locale}&populate=*`);
 
   if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    throw new Error("Failed to fetch colors");
   }
 
   const json = await res.json();
+  console.log("Colors API response:", json);
+
   const Colors = json?.data?.map(({ id, value }: any) => ({
     id,
-    value,
+    value: value,
   }));
 
   return Colors;
@@ -336,11 +370,13 @@ export async function getAllSizes({ locale }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
 
   const res = await fetch(`${apiURL}/sizes?locale=${locale}&populate=*`);
+
   if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    throw new Error("Failed to fetch sizes");
   }
 
   const json = await res.json();
+  console.log("Sizes API response:", json);
 
   const Sizes = json?.data?.map(({ id, size }: any) => ({
     id,
@@ -352,18 +388,19 @@ export async function getAllSizes({ locale }: any) {
 
 export async function getAllThickness({ locale }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
-  const assetURL = apiURL.replace(/\/api\/?$/, "");
 
   const res = await fetch(`${apiURL}/thicknesses?locale=${locale}&populate=*`);
+
   if (!res.ok) {
-    throw new Error("Failed to fetch products");
+    throw new Error("Failed to fetch thickness");
   }
 
   const json = await res.json();
+  console.log("Thickness API response:", json);
 
   const Thickness = json?.data.map(({ id, value }: any) => ({
     id,
-    value,
+    value: value,
   }));
 
   return Thickness;
@@ -373,75 +410,110 @@ export async function getFilteredProducts({
   selectedFilters,
   category,
 }: {
-  selectedFilters: {
-    Colors: string[];
-    Sizes: string[];
-    Thickness: string[];
-    Collection: string[];
-  };
   locale: string;
+  selectedFilters: any;
   category: string | null;
 }) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
-  const queryParts: string[] = [];
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  // Colors filter
-  if (selectedFilters.Colors.length) {
-    queryParts.push(
-      `filters[variations][colors][value][$in]=${selectedFilters.Colors.map(
-        encodeURIComponent
-      ).join(",")}`
-    );
+  try {
+    // If filtering by category, use the categories endpoint
+    if (category) {
+      console.log("Fetching filtered products via category endpoint for:", category);
+      return await getProductsByCategorySlug({ categorySlug: category, locale });
+    }
+
+    // For other filters or no category, try to get all products via categories
+    const url = `${apiURL}/categories?locale=${locale}&populate[products][populate][mainImage]=*&populate[products][populate][gallery]=*&populate[products][populate][variations][populate][sizes][populate][sizes]=*&populate[products][populate][variations][populate][colors]=*&populate[products][populate][variations][populate][thicknesses]=*`;
+
+    console.log("Fetching all products via categories for filtering:", url);
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error(`Categories API failed: ${res.status}`);
+      return [];
+    }
+
+    const json = await res.json();
+    console.log("Categories API Response for filtering:", json);
+
+    if (!json.data) {
+      console.warn("No data in categories API response");
+      return [];
+    }
+
+    // Flatten all products from all categories
+    const allProducts: any[] = [];
+    json.data.forEach((category: any) => {
+      if (category.products && category.products.length > 0) {
+        category.products.forEach((product: any) => {
+          allProducts.push({
+            ...product,
+            category: category.name,
+            categorySlug: category.slug,
+          });
+        });
+      }
+    });
+
+    // Apply additional filters (colors, sizes, thickness) if any
+    let filteredProducts = allProducts;
+
+    if (selectedFilters.Colors?.length) {
+      filteredProducts = filteredProducts.filter((product: any) => {
+        // Check if product has any of the selected colors
+        const productColors = product.variations?.flatMap((v: any) => v.colors?.map((c: any) => c.name)) || [];
+        return selectedFilters.Colors.some((color: string) => productColors.includes(color));
+      });
+    }
+
+    if (selectedFilters.Sizes?.length) {
+      filteredProducts = filteredProducts.filter((product: any) => {
+        // Check if product has any of the selected sizes
+        const productSizes = product.variations?.flatMap((v: any) => v.sizes?.flatMap((s: any) => s.sizes?.map((size: any) => size.value))) || [];
+        return selectedFilters.Sizes.some((size: string) => productSizes.includes(size));
+      });
+    }
+
+    if (selectedFilters.Thickness?.length) {
+      filteredProducts = filteredProducts.filter((product: any) => {
+        // Check if product has any of the selected thicknesses
+        const productThicknesses = product.variations?.flatMap((v: any) => v.thicknesses?.map((t: any) => t.value)) || [];
+        return selectedFilters.Thickness.some((thickness: string) => productThicknesses.includes(thickness));
+      });
+    }
+
+    console.log(`Filtered ${allProducts.length} products to ${filteredProducts.length} based on filters`);
+
+    return filteredProducts.map((product: any) => {
+      const mainImage = product.mainImage;
+      const gallery = product.gallery || [];
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        description: product.description,
+        image: mainImage?.url ? `${assetURL}${mainImage.url}` : null,
+        gallery: gallery.map((img: any) => ({
+          url: img.url ? `${assetURL}${img.url}` : null,
+          alternativeText: img.alternativeText || '',
+          width: img.width,
+          height: img.height,
+        })),
+        category: product.category,
+        categorySlug: product.categorySlug,
+        variations: product.variations || [],
+      };
+    });
+
+  } catch (error) {
+    console.error("Error in getFilteredProducts:", error);
+    return [];
   }
-
-  // Sizes filter (fixed nested path: sizes inside sizes)
-  if (selectedFilters.Sizes.length) {
-    queryParts.push(
-      `filters[variations][sizes][sizes][size][$in]=${selectedFilters.Sizes.map(
-        encodeURIComponent
-      ).join(",")}`
-    );
-  }
-
-  // Thickness filter
-  if (selectedFilters.Thickness.length) {
-    queryParts.push(
-      `filters[variations][thicknesses][value][$in]=${selectedFilters.Thickness.map(
-        encodeURIComponent
-      ).join(",")}`
-    );
-  }
-
-  // Collection filter (category name) — changed $eq to $in to support multiple selections
-  if (selectedFilters.Collection.length) {
-    queryParts.push(
-      `filters[category][name][$in]=${selectedFilters.Collection.map(
-        encodeURIComponent
-      ).join(",")}`
-    );
-  }
-
-  if (category) {
-    queryParts.push(
-      `filters[category][slug][$eq]=${encodeURIComponent(category)}`
-    );
-  }
-
-  // Combine all filters
-  const filterQuery = queryParts.length ? `&${queryParts.join("&")}` : "";
-
-  // Final URL with filters and populate params
-  const fullUrl = `${apiURL}/products?locale=${locale}${filterQuery}&populate[variations][populate][sizes]=true&populate[variations][populate][colors]=true&populate[variations][populate][thicknesses]=true&populate[category]=true&populate[backgroundImage]=true&populate[catalogue][populate][file]=true`;
-
-  const res = await fetch(fullUrl);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch filtered products");
-  }
-
-  const json = await res.json();
-
-  return json?.data || [];
 }
 
 export async function getLayoutData(locale: any) {

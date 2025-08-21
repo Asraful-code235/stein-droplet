@@ -19,6 +19,7 @@ export default async function ProductsPage({ searchParams, params }: Props) {
   const category = searchParams.category;
 
   const categoriesData = await getAllCategories(params.locale);
+
   const { categories } = categoriesData;
 
   const [colors, thickness, sizes] = await Promise.all([
@@ -33,6 +34,13 @@ export default async function ProductsPage({ searchParams, params }: Props) {
         categorySlug: category,
       })
     : await getAllProducts({ locale: params.locale });
+
+
+  // Log the first product's structure to understand the data
+  if (products.length > 0) {
+    console.log("First product structure:", JSON.stringify(products[0], null, 2));
+  }
+
 
   return (
     <Products
