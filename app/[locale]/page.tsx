@@ -14,8 +14,11 @@ import GallerySection from "@/components/home/ProjectShowcase";
 import Vision from "@/components/home/Vision";
 import Collections from "@/components/home/Collections";
 import ParallaxWrapper from "@/components/parallelWrapper";
+import { getTranslation } from "@/lib/i18n-server";
 
 export default async function Page({ params }: { params: { locale: string } }) {
+  const { t } = getTranslation(params.locale);
+
   const [heroData, categoriesData, discoveryData, projectShowcase, collectionData, collectionCards, projects] =
     await Promise.all([
       getHeroData(params.locale),
@@ -28,11 +31,11 @@ export default async function Page({ params }: { params: { locale: string } }) {
     ]);
 
   if (!heroData) {
-    return <div>Failed to load hero content</div>;
+    return <div>{t('common.failedToLoadHero')}</div>;
   }
 
   if (!discoveryData?.discoveryContent) {
-    return <div>Failed to load discovery</div>;
+    return <div>{t('common.failedToLoadDiscovery')}</div>;
   }
 
   const { categories, details } = categoriesData;

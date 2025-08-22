@@ -1,0 +1,113 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "comingSoon": "Coming soon...",
+    "failedToLoad": "Failed to load",
+    "failedToLoadHero": "Failed to load hero content",
+    "failedToLoadDiscovery": "Failed to load discovery",
+    "loadingProducts": "Loading products...",
+    "scrollToExplore": "Scroll to explore"
+  },
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "projects": "Projects",
+    "catalogue": "Catalogue",
+    "aboutUs": "About Us",
+    "getInTouch": "Get in Touch",
+    "ourStory": "Our Story"
+  },
+  "buttons": {
+    "discoverOurStory": "Discover Our Story",
+    "viewProject": "View Project",
+    "getQuote": "Get Quote",
+    "contactUs": "Contact Us",
+    "loadMore": "Load More",
+    "download": "Download",
+    "next": "Next",
+    "previous": "Previous",
+    "prev": "Prev",
+    "meetOurTeam": "Meet Our Team",
+    "joinOurTeam": "Join Our Team",
+    "sendMessage": "Send Message",
+    "requestQuote": "Request Quote",
+    "submit": "Submit",
+    "close": "Close"
+  },
+  "filters": {
+    "filters": "Filters",
+    "clearAllFilters": "Clear all filters",
+    "colors": "Colors",
+    "thickness": "Thickness",
+    "sizes": "Sizes",
+    "collection": "Collection",
+    "category": "Category",
+    "noProductsFound": "No products found.",
+    "showingResults": "Showing {count} results",
+    "applyFilters": "Apply Filters"
+  },
+  "gallery": {
+    "restaurants": "Restaurants",
+    "hotels": "Hotels",
+    "residential": "Residential",
+    "publicBuildings": "Public Buildings",
+    "projectImage": "Project Image"
+  },
+  "story": {
+    "ourJourney": "Our Journey",
+    "behindTheScenes": "Behind the Scenes",
+    "ourDedicatedTeam": "Our Dedicated Team",
+    "craftingSpacesWith": "Crafting Spaces with",
+    "premiumMaterials": "Premium Materials",
+    "heroDescription": "For over two decades, we have been dedicated to sourcing and providing the finest natural stones, premium ceramics, and architectural bricks that transform ordinary spaces into extraordinary experiences.",
+    "showcaseDescription": "Take a glimpse into our world - from our state-of-the-art facilities to the passionate team that makes it all possible.",
+    "teamDescription": "Meet the passionate professionals who bring expertise, creativity, and dedication to every project. From our sourcing specialists to our customer service team, everyone plays a vital role in delivering excellence.",
+    "ourModernWarehouse": "Our modern warehouse facility",
+    "rigorousQualityControl": "Rigorous quality control",
+    "carefulMaterialSelection": "Careful material selection",
+    "professionalPackaging": "Professional packaging",
+    "ourTeamAtWork": "Our team at work",
+    "yearsOfExcellence": "Years of Excellence",
+    "yearsDescription": "Two decades of sourcing the world's finest materials",
+    "globalPartners": "Global Partners",
+    "partnersDescription": "Trusted relationships with quarries and manufacturers worldwide",
+    "projectsCompleted": "Projects Completed",
+    "projectsDescription": "Spaces transformed with our premium materials",
+    "ourValues": "Our Values",
+    "excellence": "Excellence",
+    "excellenceDescription": "We never compromise on quality, sourcing only the finest materials from trusted partners worldwide.",
+    "sustainability": "Sustainability",
+    "sustainabilityDescription": "Environmental responsibility guides our sourcing decisions and business practices.",
+    "partnership": "Partnership",
+    "partnershipDescription": "We build lasting relationships with our clients, suppliers, and community."
+  },
+  "contact": {
+    "weAreHereToHelp": "We're Here to Help",
+    "helpDescription": "Durable, stylish, and built to last—just like our support. Message us anytime.",
+    "customerSupport": "Customer support",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message",
+    "company": "Company",
+    "subject": "Subject",
+    "required": "Required",
+    "optional": "Optional"
+  },
+  "projects": {
+    "exploreProjects": "Explore the {category} project gallery.",
+    "exploreAllProjects": "Explore our curated gallery of projects.",
+    "projectsTitle": "Projects",
+    "projectsCategoryTitle": "Projects – {category}"
+  },
+  "language": {
+    "english": "English",
+    "german": "Deutsch",
+    "language": "Language"
+  },
+  "meta": {
+    "steinMarine": "Stein Marine",
+    "defaultDescription": "Premium natural stones, ceramics, and architectural bricks for crafting extraordinary spaces."
+  }
+}

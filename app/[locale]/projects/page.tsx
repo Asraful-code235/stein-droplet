@@ -1,6 +1,7 @@
 import GalleryBanner from "@/components/gallery/GalleryBanner";
 import ProjectGallery from "@/components/gallery/ProjectGallery";
 import { getAllProjects, getProjectByCategoryTitle, projectShowcaseData } from "@/lib/api";
+import { getTranslation } from "@/lib/i18n-server";
 
 export async function generateMetadata({
   params,
@@ -9,11 +10,12 @@ export async function generateMetadata({
   params: { locale: string };
   searchParams: { category?: string };
 }) {
+  const { t } = getTranslation(params.locale);
   const category = searchParams?.category;
-  const title = category ? `Projects – ${category}` : "Projects";
+  const title = category ? t('projects.projectsCategoryTitle', { category }) : t('projects.projectsTitle');
   const description = category
-    ? `Explore the ${category} project gallery.`
-    : "Explore our curated gallery of projects.";
+    ? t('projects.exploreProjects', { category })
+    : t('projects.exploreAllProjects');
   return { title, description };
 }
 

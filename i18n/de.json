@@ -1,0 +1,113 @@
+{
+  "common": {
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "comingSoon": "Demnächst verfügbar...",
+    "failedToLoad": "Laden fehlgeschlagen",
+    "failedToLoadHero": "Laden des Hero-Inhalts fehlgeschlagen",
+    "failedToLoadDiscovery": "Laden der Entdeckung fehlgeschlagen",
+    "loadingProducts": "Produkte werden geladen...",
+    "scrollToExplore": "Scrollen zum Erkunden"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "products": "Produkte",
+    "projects": "Projekte",
+    "catalogue": "Katalog",
+    "aboutUs": "Über Uns",
+    "getInTouch": "Kontakt",
+    "ourStory": "Unsere Geschichte"
+  },
+  "buttons": {
+    "discoverOurStory": "Entdecken Sie Unsere Geschichte",
+    "viewProject": "Projekt Ansehen",
+    "getQuote": "Angebot Erhalten",
+    "contactUs": "Kontaktieren Sie Uns",
+    "loadMore": "Mehr Laden",
+    "download": "Herunterladen",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "prev": "Zurück",
+    "meetOurTeam": "Lernen Sie Unser Team Kennen",
+    "joinOurTeam": "Werden Sie Teil Unseres Teams",
+    "sendMessage": "Nachricht Senden",
+    "requestQuote": "Angebot Anfordern",
+    "submit": "Absenden",
+    "close": "Schließen"
+  },
+  "filters": {
+    "filters": "Filter",
+    "clearAllFilters": "Alle Filter Löschen",
+    "colors": "Farben",
+    "thickness": "Dicke",
+    "sizes": "Größen",
+    "collection": "Kollektion",
+    "category": "Kategorie",
+    "noProductsFound": "Keine Produkte gefunden.",
+    "showingResults": "{count} Ergebnisse anzeigen",
+    "applyFilters": "Filter Anwenden"
+  },
+  "gallery": {
+    "restaurants": "Restaurants",
+    "hotels": "Hotels",
+    "residential": "Wohnbereich",
+    "publicBuildings": "Öffentliche Gebäude",
+    "projectImage": "Projektbild"
+  },
+  "story": {
+    "ourJourney": "Unsere Reise",
+    "behindTheScenes": "Hinter den Kulissen",
+    "ourDedicatedTeam": "Unser Engagiertes Team",
+    "craftingSpacesWith": "Räume Gestalten mit",
+    "premiumMaterials": "Premium Materialien",
+    "heroDescription": "Seit über zwei Jahrzehnten widmen wir uns der Beschaffung und Bereitstellung der feinsten Natursteine, Premium-Keramiken und Architektursteine, die gewöhnliche Räume in außergewöhnliche Erlebnisse verwandeln.",
+    "showcaseDescription": "Werfen Sie einen Blick in unsere Welt - von unseren hochmodernen Einrichtungen bis hin zu dem leidenschaftlichen Team, das alles möglich macht.",
+    "teamDescription": "Lernen Sie die leidenschaftlichen Fachkräfte kennen, die Expertise, Kreativität und Hingabe in jedes Projekt einbringen. Von unseren Beschaffungsspezialisten bis hin zu unserem Kundenservice-Team spielt jeder eine wichtige Rolle bei der Lieferung von Exzellenz.",
+    "ourModernWarehouse": "Unser modernes Lagerhaus",
+    "rigorousQualityControl": "Strenge Qualitätskontrolle",
+    "carefulMaterialSelection": "Sorgfältige Materialauswahl",
+    "professionalPackaging": "Professionelle Verpackung",
+    "ourTeamAtWork": "Unser Team bei der Arbeit",
+    "yearsOfExcellence": "Jahre der Exzellenz",
+    "yearsDescription": "Zwei Jahrzehnte der Beschaffung der weltweit feinsten Materialien",
+    "globalPartners": "Globale Partner",
+    "partnersDescription": "Vertrauensvolle Beziehungen zu Steinbrüchen und Herstellern weltweit",
+    "projectsCompleted": "Abgeschlossene Projekte",
+    "projectsDescription": "Räume, die mit unseren Premium-Materialien verwandelt wurden",
+    "ourValues": "Unsere Werte",
+    "excellence": "Exzellenz",
+    "excellenceDescription": "Wir machen niemals Kompromisse bei der Qualität und beziehen nur die feinsten Materialien von vertrauenswürdigen Partnern weltweit.",
+    "sustainability": "Nachhaltigkeit",
+    "sustainabilityDescription": "Umweltverantwortung leitet unsere Beschaffungsentscheidungen und Geschäftspraktiken.",
+    "partnership": "Partnerschaft",
+    "partnershipDescription": "Wir bauen dauerhafte Beziehungen zu unseren Kunden, Lieferanten und der Gemeinschaft auf."
+  },
+  "contact": {
+    "weAreHereToHelp": "Wir Sind Hier, Um Zu Helfen",
+    "helpDescription": "Langlebig, stilvoll und für die Ewigkeit gebaut - genau wie unser Support. Schreiben Sie uns jederzeit.",
+    "customerSupport": "Kundensupport",
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "message": "Nachricht",
+    "company": "Unternehmen",
+    "subject": "Betreff",
+    "required": "Erforderlich",
+    "optional": "Optional"
+  },
+  "projects": {
+    "exploreProjects": "Erkunden Sie die {category} Projektgalerie.",
+    "exploreAllProjects": "Erkunden Sie unsere kuratierte Galerie von Projekten.",
+    "projectsTitle": "Projekte",
+    "projectsCategoryTitle": "Projekte – {category}"
+  },
+  "language": {
+    "english": "English",
+    "german": "Deutsch",
+    "language": "Sprache"
+  },
+  "meta": {
+    "steinMarine": "Stein Marine",
+    "defaultDescription": "Premium Natursteine, Keramiken und Architektursteine für die Gestaltung außergewöhnlicher Räume."
+  }
+}

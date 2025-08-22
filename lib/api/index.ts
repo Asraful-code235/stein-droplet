@@ -1188,3 +1188,52 @@ export async function getDirectContactData({ locale }: any) {
     contactCards,
   };
 }
+
+export async function getOurStoryData({ locale }: any) {
+  const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  const params = new URLSearchParams({
+    locale: locale,
+    "populate[hero][populate]": "*",
+    "populate[content][populate]": "*",
+    "populate[showcase][populate][images]": "*",
+    "populate[showcase][populate][teamSection][populate]": "*",
+  });
+
+  try {
+    // First try to get from pages with our-story section
+    const res = await fetch(
+      `${apiURL}/api/pages?${params.toString()}`
+    );
+
+    if (!res.ok) {
+      console.warn("Failed to fetch pages for our-story data");
+      return null;
+    }
+
+    const data = await res.json();
+    const ourStorySection = data?.data?.[0]?.Sections?.find(
+      (section: any) => section.__component === "story.our-story"
+    );
+
+    if (ourStorySection) {
+      return ourStorySection;
+    }
+
+    // If not found in pages, try dedicated our-story endpoint
+    const storyRes = await fetch(
+      `${apiURL}/api/our-story?${params.toString()}`
+    );
+
+    if (!storyRes.ok) {
+      console.warn("Failed to fetch our-story data");
+      return null;
+    }
+
+    const storyData = await storyRes.json();
+    return storyData?.data;
+  } catch (error) {
+    console.error("Error fetching our story data:", error);
+    return null;
+  }
+}

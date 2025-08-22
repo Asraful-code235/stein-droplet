@@ -1,8 +1,12 @@
+"use client";
 import React from "react";
 import Image from "next/image";
-import story from "@/assets/story.png";
+import Link from "next/link";
+import { useTranslation } from "@/lib/i18n";
 
 const StorySection = ({ discoveryData }: any) => {
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white py-8 md:py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
@@ -10,7 +14,7 @@ const StorySection = ({ discoveryData }: any) => {
           <Image
             src={discoveryData?.backgroundImage} 
             
-            alt="Stonecraftsmanship"
+            alt="Stone craftsmanship"
             width={600}
             height={400}
             className="rounded-lg shadow-lg object-cover w-full h-auto"
@@ -29,9 +33,11 @@ const StorySection = ({ discoveryData }: any) => {
             {discoveryData?.description}{" "}
           </p>
           <div className="flex justify-center mt-4">
-            <button className="bg-[#CB7856] text-white font-sans font-semibold px-6 py-2 rounded-full transition">
-              Discover Our Story
-            </button>
+            <Link href="/our-story">
+              <button className="bg-[#CB7856] text-white font-sans font-semibold px-6 py-2 rounded-full hover:bg-[#B86A4A] transition-colors duration-300">
+                {t('buttons.discoverOurStory')}
+              </button>
+            </Link>
           </div>
         </div>
       </div>

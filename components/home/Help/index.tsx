@@ -1,6 +1,8 @@
+"use client";
 import React from "react";
 import Image, { StaticImageData } from "next/image";
 import Help from "@/assets/Help.png";
+import { useTranslation } from "@/lib/i18n";
 import ellipse from "@/assets/Ellipse.png";
 import phone from "@/assets/mobile.png";
 import Message from "@/assets/mail.png";
@@ -73,24 +75,25 @@ const ContactInfoItem: React.FC<ContactInfoItemProps> = ({ icon, text }) => (
 );
 
 const ContactPage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 font-sans">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
         {/* Left Column - Contact Information */}
         <div className="p-4 sm:p-6 lg:p-8 rounded-lg">
           <h1 className="text-2xl sm:text-[28px] md:text-[31px] text-darkfontColor font-bold">
-            We're Here to Help
+            {t('contact.weAreHereToHelp')}
           </h1>
 
           <p className="mt-2 mb-6 md:mb-8 text-xs sm:text-sm md:text-[14px] font-normal text-fontColor">
-            Durable, stylish, and built to last—just like our support. Message
-            us anytime.
+            {t('contact.helpDescription')}
           </p>
 
           <div className="mb-4 md:mb-6">
             <Image
               src={Help}
-              alt="Customersupport"
+              alt={t('contact.customerSupport')}
               className="rounded-lg w-full h-auto max-h-[290px] object-cover"
               width={600}
               height={400}

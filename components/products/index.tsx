@@ -6,6 +6,7 @@ import { FaArrowDownLong, FaArrowUpLong } from 'react-icons/fa6';
 import { SlidersHorizontal } from 'lucide-react';
 import collections from '@/assets/Collection1.png';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 interface Product {
   id: string;
@@ -54,6 +55,7 @@ const Products = ({
   sizes = [],
   colors = [],
 }: ProductsProps) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -73,9 +75,9 @@ const Products = ({
   });
 
   const filters = [
-    { name: 'Colors', options: colors.map((c) => c.value) },
-    { name: 'Thickness', options: thickness.map((t) => t.value) },
-    { name: 'Sizes', options: sizes.map((s) => s.value) },
+    { name: t('filters.colors'), options: colors.map((c) => c.value) },
+    { name: t('filters.thickness'), options: thickness.map((t) => t.value) },
+    { name: t('filters.sizes'), options: sizes.map((s) => s.value) },
   ];
 
   useEffect(() => {
@@ -267,7 +269,7 @@ const Products = ({
             className='mb-4 flex items-center gap-2 border border-[#CFBBA4] text-[#CFBBA4] px-3 py-1 rounded'
           >
             <SlidersHorizontalIcon size={16} />
-            Filters
+            {t('filters.filters')}
           </button>
         )}
 
@@ -283,7 +285,7 @@ const Products = ({
           >
             {isMobile && (
               <div className='flex justify-between items-center p-4 border-b border-[#CB7856]'>
-                <h3 className='font-bold'>Filters</h3>
+                <h3 className='font-bold'>{t('filters.filters')}</h3>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
                   className='text-2xl'
@@ -339,22 +341,22 @@ const Products = ({
                 onClick={clearAllFilters}
                 className='w-full mt-4 text-[#CB7856] hover:underline text-sm'
               >
-                Clear all filters
+                {t('filters.clearAllFilters')}
               </button>
             </div>
           </div>
 
           <div className='flex-1'>
             {loading ? (
-              <p className='text-center py-12'>Loading products...</p>
+              <p className='text-center py-12'>{t('common.loadingProducts')}</p>
             ) : !products || products.length === 0 ? (
               <div className='text-center py-12'>
-                <p>No products found.</p>
+                <p>{t('filters.noProductsFound')}</p>
                 <button
                   onClick={clearAllFilters}
                   className='mt-2 text-[#CB7856] hover:underline'
                 >
-                  Clear all filters
+                  {t('filters.clearAllFilters')}
                 </button>
               </div>
             ) : (

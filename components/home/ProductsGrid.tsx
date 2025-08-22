@@ -8,6 +8,8 @@ const ProductsGrid = ({ data }: any) => {
   const params = useParams();
   const locale = params.locale;
 
+  console.log("data",data)
+
   const CollectionCard = ({ data }: any) => {
     const imageSrc = data?.backgroundImage;
     const isValidSrc =

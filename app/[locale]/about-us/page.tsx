@@ -4,15 +4,18 @@ import Vision from "@/components/home/Vision";
 import QuoteSection from "@/components/home/StorySection";
 import Image from "next/image"; // ✅ ADD THIS
 import img from "@/assets/about.png";
+import { getTranslation } from "@/lib/i18n-server";
 
 export default async function Page({ params }: any) {
+  const { t } = getTranslation(params.locale);
+
   const discoveryData = await getDiscoveryData(params.locale);
   const categoriesData = await getAllCategories(params.locale);
   const getaboutus = await getAboutUsData(params.locale);
   const { categories, details } = categoriesData;
   const { title, subTitle, image, description }: any = getaboutus;
   if (!discoveryData?.discoveryContent) {
-    return <div>Failed to load discovery</div>;
+    return <div>{t('common.failedToLoadDiscovery')}</div>;
   }
 
   return (
