@@ -5,9 +5,11 @@ import Message from "@/assets/Message.png";
 import arrow from "@/assets/arrowblack.png";
 import { FormInput } from "../FormInput";
 import { toast } from "react-toastify";
+import { useTranslation } from "@/lib/i18n";
 
 export default function MessageFormComponent() {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const { t } = useTranslation();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -86,22 +88,22 @@ const handleSubmit = async (e: React.FormEvent) => {
     <div className="bg-white border border-[#CB7856] mx-auto w-full max-w-xl text-[#101820] rounded-xl p-6 md:p-8 shadow-md">
       <div className="flex items-center gap-2 mb-2">
         <Image src={Message} height={23} width={23} alt="Message" />
-        <h3 className="text-[24px] font-semibold font-inter">Send us a Message</h3>
+        <h3 className="text-[24px] font-semibold font-inter">{t('contact.sendUsAMessage')}</h3>
       </div>
-      <p className="text-[14px] mb-6">Have a question or need assistance? We're here to help.</p>
+      <p className="text-[14px] mb-6">{t('contact.messageDescription')}</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput id="name" label="Name" type="text" required onChange={handleChange} />
-          <FormInput id="phone" label="Phone" type="tel" onChange={handleChange} />
+          <FormInput id="name" label={t('contact.name')} type="text" required onChange={handleChange} />
+          <FormInput id="phone" label={t('contact.phone')} type="tel" onChange={handleChange} />
         </div>
 
-        <FormInput id="email" label="Email" type="email" required onChange={handleChange} />
+        <FormInput id="email" label={t('contact.email')} type="email" required onChange={handleChange} />
         <FormInput
           id="message"
-          label="Message"
+          label={t('contact.message')}
           type="textarea"
-          placeholder="Tell us about your project or inquiry…"
+          placeholder={t('contact.messagePlaceholder')}
           rows={5}
           onChange={handleChange}
         />
@@ -111,7 +113,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           className="flex gap-3 justify-center items-center bg-[#CB7856] w-full text-white font-inter py-3 rounded-md"
         >
           <Image src={arrow} width={20} height={20} alt="Send" />
-          Send Message
+          {t('buttons.sendMessage')}
         </button>
       </form>
     </div>

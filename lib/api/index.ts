@@ -92,21 +92,26 @@ export async function getAllCategories(locale: any) {
   // 1️⃣ Read from env
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
-  const [productsRes, pagesRes] = await Promise.all([
-    fetch(`${apiURL}/categories?locale=${locale}&populate=backgroundImage`),
+  const [categoriesRes, collectionsRes, pagesRes] = await Promise.all([
+    fetch(`${apiURL}/categories?locale=${locale}&populate=*`),
+    fetch(`${apiURL}/collections?locale=${locale}&populate=backgroundImage`),
     fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
   ]);
   // 3️⃣ Error-check
-  if (!productsRes.ok) {
-    throw new Error(`Products fetch failed: ${productsRes.statusText}`);
+  if (!categoriesRes.ok) {
+    throw new Error(`Categories fetch failed: ${categoriesRes.statusText}`);
+  }
+  if (!collectionsRes.ok) {
+    throw new Error(`Collections fetch failed: ${collectionsRes.statusText}`);
   }
   if (!pagesRes.ok) {
     throw new Error(`Pages fetch failed: ${pagesRes.statusText}`);
   }
 
   // 4️⃣ JSON-parse in parallel
-  const [{ data: productsData }, { data: pagesData }] = await Promise.all([
-    productsRes.json(),
+  const [{ data: categoriesData }, { data: collectionsData }, { data: pagesData }] = await Promise.all([
+    categoriesRes.json(),
+    collectionsRes.json(),
     pagesRes.json(),
   ]);
 
@@ -127,22 +132,32 @@ export async function getAllCategories(locale: any) {
     },
   };
 
-  // 6️⃣ Shape categories array with backgroundImage
-  const categories = productsData.map((category: any) => ({
-    id: category.id,
-    title: category.name,
-    slug: category?.slug,
-    description: category.description,
-    documentId: category.documentId,
-    createdAt: category.createdAt,
-    updatedAt: category.updatedAt,
-    publishedAt: category.publishedAt,
-    backgroundImage: category.backgroundImage?.url
-      ? `${assetURL}${category.backgroundImage.url}`
-      : null,
-    backgroundImageAlt: category.backgroundImage?.alternativeText || "",
-    backgroundImageName: category.backgroundImage?.name || "",
-  }));
+  // 6️⃣ Create a map of collections by slug for easy lookup
+  const collectionsMap = new Map();
+  collectionsData.forEach((collection: any) => {
+    collectionsMap.set(collection.slug, collection);
+  });
+
+  // 7️⃣ Shape categories array with backgroundImage from collections
+  const categories = categoriesData.map((category: any) => {
+    const matchingCollection = collectionsMap.get(category.slug);
+
+    return {
+      id: category.id,
+      title: category.name,
+      slug: category?.slug,
+      description: category.description,
+      documentId: category.documentId,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+      publishedAt: category.publishedAt,
+      backgroundImage: matchingCollection?.backgroundImage?.url
+        ? `${assetURL}${matchingCollection.backgroundImage.url}`
+        : null,
+      backgroundImageAlt: matchingCollection?.backgroundImage?.alternativeText || "",
+      backgroundImageName: matchingCollection?.backgroundImage?.name || "",
+    };
+  });
   return {
     details,
     categories,

@@ -33,7 +33,8 @@
     "sendMessage": "Nachricht Senden",
     "requestQuote": "Angebot Anfordern",
     "submit": "Absenden",
-    "close": "Schließen"
+    "close": "Schließen",
+    "exploreCatalogue": "Katalog Erkunden"
   },
   "filters": {
     "filters": "Filter",
@@ -93,7 +94,15 @@
     "company": "Unternehmen",
     "subject": "Betreff",
     "required": "Erforderlich",
-    "optional": "Optional"
+    "optional": "Optional",
+    "sendUsAMessage": "Senden Sie uns eine Nachricht",
+    "messageDescription": "Haben Sie eine Frage oder benötigen Hilfe? Wir sind hier, um zu helfen.",
+    "messagePlaceholder": "Erzählen Sie uns von Ihrem Projekt oder Ihrer Anfrage…",
+    "selectCategory": "Kategorie Auswählen",
+    "choose": "Wählen...",
+    "quoteRequirements": "Ihre Anforderungen angeben",
+    "loadingProducts": "Produkte werden geladen…",
+    "projectPlaceholder": "Erzählen Sie uns von Ihrem Projekt…"
   },
   "projects": {
     "exploreProjects": "Erkunden Sie die {category} Projektgalerie.",
@@ -105,6 +114,15 @@
     "english": "English",
     "german": "Deutsch",
     "language": "Sprache"
+  },
+  "footer": {
+    "quickLinks": "Schnellzugriff",
+    "ourMaterials": "Unsere Materialien",
+    "getInTouch": "Kontakt",
+    "tel": "Tel",
+    "email": "E-Mail",
+    "hours": "Mo-Fr",
+    "copyright": "© 2025 SteinMarine. Alle Rechte vorbehalten | Datenschutz | Nutzungsbedingungen"
   },
   "meta": {
     "steinMarine": "Stein Marine",

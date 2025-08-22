@@ -13,10 +13,16 @@ export default async function Page({ params }: any) {
   const categoriesData = await getAllCategories(params.locale);
   const getaboutus = await getAboutUsData(params.locale);
   const { categories, details } = categoriesData;
-  const { title, subTitle, image, description }: any = getaboutus;
+
   if (!discoveryData?.discoveryContent) {
     return <div>{t('common.failedToLoadDiscovery')}</div>;
   }
+
+  if (!getaboutus) {
+    return <div>{t('common.failedToLoad')}</div>;
+  }
+
+  const { title, subTitle, image, description }: any = getaboutus;
 
   return (
     <div>

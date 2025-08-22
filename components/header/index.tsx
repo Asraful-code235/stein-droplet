@@ -7,7 +7,7 @@ import LanguageSelector from "../home/LanguageSelector";
 import Logo from "@/assets/logo.png";
 import Image from "next/image";
 
-export default function Navbar({ data }: any) {
+export default function Navbar({ data, locale }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrollingDown, setIsScrollingDown] = useState(false);
   const [isHoveringTop, setIsHoveringTop] = useState(false);
@@ -50,7 +50,7 @@ export default function Navbar({ data }: any) {
         onMouseLeave={() => setIsHoveringTop(false)}
       >
         <div className="container mx-auto px-4 py-1 h-[90px] flex items-center justify-between">
-          <Link href="/">
+          <Link href={`/${locale}`}>
             <Image
               src={data?.logo?.url}
               alt="logo"
@@ -66,7 +66,7 @@ export default function Navbar({ data }: any) {
                 {data?.headerLinks?.map(({ text, url, id }: any) => (
                   <li key={id}>
                     <Link
-                      href={url}
+                      href={`/${locale}/${url}`}
                       className={`text-sm md:text-[14px] font-semibold transition-colors ${
                         pathname === url
                           ? "text-[#CB7856]"
@@ -114,7 +114,7 @@ export default function Navbar({ data }: any) {
             {data?.headerLinks?.map(({ id, text, url }: any) => (
               <li key={id}>
                 <Link
-                  href={url}
+                  href={`/${locale}/${url}`}
                   className={`block text-lg font-semibold ${
                     pathname === url
                       ? "text-[#CB7856]"

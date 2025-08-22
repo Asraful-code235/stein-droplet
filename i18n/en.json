@@ -33,7 +33,8 @@
     "sendMessage": "Send Message",
     "requestQuote": "Request Quote",
     "submit": "Submit",
-    "close": "Close"
+    "close": "Close",
+    "exploreCatalogue": "Explore Catalogue"
   },
   "filters": {
     "filters": "Filters",
@@ -93,7 +94,15 @@
     "company": "Company",
     "subject": "Subject",
     "required": "Required",
-    "optional": "Optional"
+    "optional": "Optional",
+    "sendUsAMessage": "Send us a Message",
+    "messageDescription": "Have a question or need assistance? We're here to help.",
+    "messagePlaceholder": "Tell us about your project or inquiry…",
+    "selectCategory": "Select Category",
+    "choose": "Choose...",
+    "quoteRequirements": "Quote your requirements",
+    "loadingProducts": "Loading products…",
+    "projectPlaceholder": "Tell us about your project…"
   },
   "projects": {
     "exploreProjects": "Explore the {category} project gallery.",
@@ -105,6 +114,15 @@
     "english": "English",
     "german": "Deutsch",
     "language": "Language"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "ourMaterials": "Our Materials",
+    "getInTouch": "Get In Touch",
+    "tel": "Tel",
+    "email": "Email",
+    "hours": "Mon-Fri",
+    "copyright": "© 2025 SteinMarine. All rights reserved | Privacy Policy | Terms of Service"
   },
   "meta": {
     "steinMarine": "Stein Marine",

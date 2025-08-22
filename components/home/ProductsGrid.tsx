@@ -3,15 +3,16 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "@/lib/i18n";
 
 const ProductsGrid = ({ data }: any) => {
   const params = useParams();
   const locale = params.locale;
-
-  console.log("data",data)
+  const { t } = useTranslation();
 
   const CollectionCard = ({ data }: any) => {
     const imageSrc = data?.backgroundImage;
+
     const isValidSrc =
       typeof imageSrc === "string" &&
       (imageSrc.startsWith("/") ||

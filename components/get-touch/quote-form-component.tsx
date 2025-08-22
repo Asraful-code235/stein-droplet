@@ -6,6 +6,7 @@ import blackdoc from "@/assets/blackdecument.png";
 import { FormInput } from "../FormInput";
 import { getProductsByCategorySlug } from "@/lib/api";
 import { toast } from "react-toastify";
+import { useTranslation } from "@/lib/i18n";
 
 interface Field {
   id: number;
@@ -33,6 +34,7 @@ export default function QuoteFormComponent({
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useTranslation();
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -125,21 +127,21 @@ export default function QuoteFormComponent({
         <div className="grid grid-cols-2 gap-4">
           <FormInput
             id="name"
-            label="Name"
+            label={t('contact.name')}
             type="text"
             required
             onChange={handleChange}
           />
           <FormInput
             id="phone"
-            label="Phone"
+            label={t('contact.phone')}
             type="tel"
             onChange={handleChange}
           />
         </div>
         <FormInput
           id="email"
-          label="Email"
+          label={t('contact.email')}
           type="email"
           required
           onChange={handleChange}
@@ -147,7 +149,7 @@ export default function QuoteFormComponent({
 
         <div>
           <label htmlFor="select Category" className="block mb-1">
-            Select Category *
+            {t('contact.selectCategory')} *
           </label>
           <select
             id="select Category"
@@ -156,7 +158,7 @@ export default function QuoteFormComponent({
             required
             className="w-full border px-2 py-2 rounded"
           >
-            <option value="">Choose...</option>
+            <option value="">{t('contact.choose')}</option>
             {Categories.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.title}
@@ -167,21 +169,21 @@ export default function QuoteFormComponent({
 
         <FormInput
           id="short_message"
-          label="quote your requirements."
+          label={t('contact.quoteRequirements')}
           type="text"
           required
           onChange={handleChange}
         />
 
-        {isLoading && <p>Loading products…</p>}
+        {isLoading && <p>{t('contact.loadingProducts')}</p>}
         {error && <p className="text-red-500">{error}</p>}
 
         <FormInput
           id="message"
-          label="Message"
+          label={t('contact.message')}
           type="textarea"
           rows={5}
-          placeholder="Tell us about your project…"
+          placeholder={t('contact.projectPlaceholder')}
           onChange={handleChange}
         />
 
@@ -190,7 +192,7 @@ export default function QuoteFormComponent({
           className="flex items-center justify-center gap-3 bg-[#CB7856] text-white py-3 rounded w-full"
         >
           <Image src={blackdoc} height={23} width={23} alt="SubmitIcon" />
-          Request Quote
+          {t('buttons.requestQuote')}
         </button>
       </form>
     </div>

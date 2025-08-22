@@ -35,7 +35,7 @@ export default async function RootLayout({
   const Data = await getLayoutData(params?.locale);
   return (
     <>
-      <Navbar data={Data} />
+      <Navbar data={Data} locale={params?.locale || "en"} />
       <ParallaxInitializer>
         <ToastContainer position="top-right" autoClose={5000} />
 

@@ -5,6 +5,7 @@ import React, { useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/lib/i18n";
 
 interface CollectionCardProps {
   id: number;
@@ -22,6 +23,7 @@ interface CollectionCardProps {
 const CollectionGrid = ({ collections, locale }: any) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { t } = useTranslation();
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -106,7 +108,7 @@ const CollectionGrid = ({ collections, locale }: any) => {
           onClick={() => router.push(`${locale}/catalogue/${slug}`)}
           className="bg-[#CB7856] hover:bg-white text-white px-4 py-2 md:px-5 md:py-2.5 rounded-full text-sm md:text-base font-medium hover:text-darkBlue transition-colors duration-300 w-fit group"
         >
-          Explore Catalogue{" "}
+          {t('buttons.exploreCatalogue')}{" "}
           <span className="ml-1 group-hover:translate-x-1 transition-transform duration-300">
             →
           </span>

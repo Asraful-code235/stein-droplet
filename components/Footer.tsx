@@ -8,10 +8,12 @@ import Linked from "@/assets/linked.png";
 import Youtube from "@/assets/youtube.png";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n";
 
 export default function Footer({ data }: any) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -75,7 +77,7 @@ export default function Footer({ data }: any) {
         {/* Quick Links */}
         <div className="space-y-4">
           <h3 className="text-lg text-[#101820] font-semibold font-inter">
-            Quick Links
+            {t('footer.quickLinks')}
           </h3>
           <ul className="space-y-2 text-gray-600 font-sans">
             {data?.footer?.quickLinks.map((item: any, i: number) => (
@@ -98,7 +100,7 @@ export default function Footer({ data }: any) {
         {/* Our Materials */}
         <div className="space-y-4">
           <h3 className="text-lg text-[#101820] font-semibold font-inter">
-            Our Materials
+            {t('footer.ourMaterials')}
           </h3>
           <ul className="space-y-2 text-gray-600 font-sans">
             {data?.footer?.materialLinks.map((item: any) => (
@@ -120,7 +122,7 @@ export default function Footer({ data }: any) {
         {/* Get In Touch - Hydration Safe */}
         <div className="space-y-4">
           <h3 className="text-lg text-[#101820] font-semibold font-inter">
-            Get In Touch
+            {t('footer.getInTouch')}
           </h3>
           {mounted && (
             <div className="flex flex-col text-gray-600 gap-y-2">
@@ -133,19 +135,19 @@ export default function Footer({ data }: any) {
               <div className="flex items-center gap-2">
                 <BsTelephone className="text-[#101820] text-[18px]" />
                 <p className="flex-1 hover:underline text-[16px] text-[#101820] font-sans">
-                  Tel: {data?.footer?.contactInfo?.phone}
+                  {t('footer.tel')}: {data?.footer?.contactInfo?.phone}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <BsEnvelope className="text-[#101820] text-[18px]" />
                 <p className="flex-1 hover:underline text-[16px] text-[#101820] font-sans">
-                  Email: {data?.footer?.contactInfo?.email}
+                  {t('footer.email')}: {data?.footer?.contactInfo?.email}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <BsClock className="text-[#101820] text-[18px]" />
                 <p className="flex-1 hover:underline text-[16px] text-[#101820] font-sans">
-                  Mon-Fri: {data?.footer?.contactInfo?.time}
+                  {t('footer.hours')}: {data?.footer?.contactInfo?.time}
                 </p>
               </div>
             </div>
@@ -158,8 +160,7 @@ export default function Footer({ data }: any) {
         <hr className="text-[#101820] max-w-6xl mx-auto" />
         <div className="max-w-6xl mx-auto py-4 flex flex-col md:flex-row justify-center items-center gap-4 text-sm text-gray-600">
           <p className="text-[16px] text-white p-3 font-sans">
-            © 2025 SteinMarine. All rights reserved | Privacy Policy | Terms of
-            Service
+            {t('footer.copyright')}
           </p>
         </div>
       </div>
