@@ -52,6 +52,87 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Custom animations for Our Story page */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expand-width {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.animate-expand-width {
+  animation: expand-width 1.5s ease-out 1s forwards;
+  width: 0;
+}
+
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-900 {
+  animation-delay: 0.9s;
+}
+
+/* Enhanced prose styles for rich content */
+.prose blockquote {
+  border-left: 4px solid #CB7856;
+  padding-left: 1.5rem;
+  font-style: italic;
+  background: rgba(203, 120, 86, 0.05);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin: 2rem 0;
+}
+
+.prose blockquote p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.prose blockquote cite {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.prose h3 {
+  color: #CB7856;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose h4 {
+  color: #101820;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

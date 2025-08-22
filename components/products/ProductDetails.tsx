@@ -182,7 +182,9 @@ export default function ProductDetails() {
           <h1 className="text-2xl font-bold text-white">{product.name}</h1>
 
           <div>
-            <p className="font-semibold text-lg text-white font-sans mb-0">{t('product.availableSizes')}</p>
+            <p className="font-semibold text-lg text-white font-sans mb-0">
+              {t('product.availableSizes')}
+            </p>
             <div className="flex flex-wrap gap-2">
               {product.variations?.sizes?.flatMap((group: any) =>
                 group.sizes.map((size: any, i: number) => (
@@ -205,7 +207,7 @@ export default function ProductDetails() {
           <div className="text-sm space-y-1 text-white font-sans">
             <p>
               <strong>{t('product.byM2')}:</strong> € {pricePerM2}
-              <span className="text-gray-200 italic"> {t('product.taxShipping')}</span>
+              <span className="text-gray-200 italic"> {product?.taxInfo || t('product.taxShipping')}</span>
             </p>
             <p>
               <strong>{t('product.byBox')}:</strong> € {pricePerBox}
@@ -214,11 +216,15 @@ export default function ProductDetails() {
 
           {/* Quantity/Price Section */}
           <div>
-            <p className="font-semibold text-lg mb-2 text-white font-inter">{t('product.calculatePrice')}</p>
+            <p className="font-semibold text-lg mb-2 text-white font-inter">
+              {t('product.calculatePrice')}
+            </p>
             <div className="space-y-3 max-w-[100%]">
               {/* Quantity M2 Input */}
               <div className="flex justify-between items-center">
-                <strong className="text-sm text-white">{t('product.quantityM2')}</strong>
+                <strong className="text-sm text-white">
+                  {t('product.quantityM2')}
+                </strong>
                 <input
                   type="number"
                   min={0}
@@ -237,7 +243,9 @@ export default function ProductDetails() {
 
               {/* Box Quantity */}
               <div className="flex justify-between items-center">
-                <strong className="text-white">{t('product.quantityBox')}</strong>
+                <strong className="text-white">
+                  {t('product.quantityBox')}
+                </strong>
                 <div className="flex items-center mt-1">
                   <button
                     onClick={() => setQuantityBox((prev) => Math.max(prev - 1, 1))}
@@ -261,18 +269,24 @@ export default function ProductDetails() {
               <div className="text-white space-y-1">
                 <div className="text-xl font-bold font-inter">
                   € {totalPriceM2}
-                  <div className="text-sm font-normal">{t('product.byM2Total')}</div>
+                  <div className="text-sm font-normal">
+                    {t('product.byM2Total')}
+                  </div>
                 </div>
                 <div className="text-xl font-bold font-inter">
                   € {totalPriceBox}
                   <div className="text-sm font-normal">
-                    {t('product.taxShippingByBox')}
+                    {product?.taxInfo || t('product.taxShipping')} ({t('product.byBox')})
                   </div>
                 </div>
               </div>
 
               <p className="text-xs text-white font-inter">
-                {t('product.deliveryInfo')}
+                {product?.deliveryInfo ? (
+                  <div dangerouslySetInnerHTML={{ __html: product.deliveryInfo }} />
+                ) : (
+                  t('product.deliveryInfo')
+                )}
               </p>
 
               <div className="flex justify-center items-center w-full">

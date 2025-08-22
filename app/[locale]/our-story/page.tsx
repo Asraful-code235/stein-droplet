@@ -1,13 +1,14 @@
 import { getOurStoryData } from "@/lib/api";
 import React from "react";
 import StoryHero from "@/components/story/StoryHero";
+import { getTranslation } from "@/lib/i18n-server";
 import StoryContent from "@/components/story/StoryContent";
 import CompanyShowcase from "@/components/story/CompanyShowcase";
-import { getTranslation } from "@/lib/i18n-server";
 
 export default async function OurStoryPage({ params }: { params: { locale: string } }) {
   const { t } = getTranslation(params.locale);
   const storyData = await getOurStoryData({ locale: params.locale });
+
 
   if (!storyData) {
     return (

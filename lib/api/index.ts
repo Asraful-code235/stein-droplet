@@ -1041,6 +1041,9 @@ export async function getProductById({ locale, id }: any) {
         variations,
         backgroundImage,
         catalogue,
+        // Only essential dynamic fields
+        deliveryInfo,
+        taxInfo,
       } = data;
 
       // Add assetURL to each image and its formats
@@ -1079,6 +1082,9 @@ export async function getProductById({ locale, id }: any) {
         variations,
         backgroundImage: backgroundImageWithFullUrls,
         catalogue: updatedCatalogue,
+        // Only essential dynamic fields from Strapi
+        deliveryInfo,
+        taxInfo,
       };
     }
   } catch (error) {
@@ -1149,6 +1155,9 @@ export async function getProductByIdFromCategories({ locale, id }: any) {
       variations: foundProduct.variations,
       backgroundImage: backgroundImage,
       catalogue: foundProduct.catalogue || null,
+      // Only essential dynamic fields from Strapi
+      deliveryInfo: foundProduct.deliveryInfo,
+      taxInfo: foundProduct.taxInfo,
     };
   } catch (error) {
     console.error("Error fetching product by ID from categories:", error);
@@ -1280,46 +1289,32 @@ export async function getDirectContactData({ locale }: any) {
 export async function getOurStoryData({ locale }: any) {
   const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+  // Deep populate to get all nested fields including media
   const params = new URLSearchParams({
     locale: locale,
-    "populate[hero][populate]": "*",
-    "populate[content][populate]": "*",
-    "populate[showcase][populate][images]": "*",
-    "populate[showcase][populate][teamSection][populate]": "*",
+    populate: "deep",
   });
 
   try {
-    // First try to get from pages with our-story section
+
     const res = await fetch(
-      `${apiURL}/api/pages?${params.toString()}`
+      `${apiURL}/api/our-story?${params.toString()}&populate=deep`,
+      {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      }
     );
 
     if (!res.ok) {
-      console.warn("Failed to fetch pages for our-story data");
+      console.error(`Failed to fetch our-story data: ${res.status} ${res.statusText}`);
       return null;
     }
 
     const data = await res.json();
-    const ourStorySection = data?.data?.[0]?.Sections?.find(
-      (section: any) => section.__component === "story.our-story"
-    );
+    console.log("Our Story API Response:", JSON.stringify(data, null, 2));
 
-    if (ourStorySection) {
-      return ourStorySection;
-    }
-
-    // If not found in pages, try dedicated our-story endpoint
-    const storyRes = await fetch(
-      `${apiURL}/api/our-story?${params.toString()}`
-    );
-
-    if (!storyRes.ok) {
-      console.warn("Failed to fetch our-story data");
-      return null;
-    }
-
-    const storyData = await storyRes.json();
-    return storyData?.data;
+    return data?.data;
   } catch (error) {
     console.error("Error fetching our story data:", error);
     return null;

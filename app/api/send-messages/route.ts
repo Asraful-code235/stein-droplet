@@ -23,6 +23,9 @@ export async function POST(req: NextRequest) {
       name = "No name",
       email = "No email",
       message = "No message",
+      phone = "",
+      category = "",
+      short_message = "",
     } = data || {};
 
     const transporter = nodemailer.createTransport({
@@ -33,16 +36,30 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Determine if this is a quote request or general message
+    const isQuoteRequest = category || short_message;
+    const subject = isQuoteRequest
+      ? `New Quote Request from ${name}`
+      : `New Contact Message from ${name}`;
+
+    // Build email content based on type
+    let emailContent = `
+      <h2>${isQuoteRequest ? 'Quote Request' : 'Contact Message'}</h2>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      ${phone ? `<p><strong>Phone:</strong> ${phone}</p>` : ''}
+      ${category ? `<p><strong>Category:</strong> ${category}</p>` : ''}
+      ${short_message ? `<p><strong>Requirements:</strong> ${short_message}</p>` : ''}
+      <p><strong>Message:</strong></p>
+      <p>${message}</p>
+    `;
+
     const mailOptions = {
       from: process.env.GMAIL_USER,
-      to: email, // recipient
-      subject: `New Contact Message from ${name}`,
-      html: `
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-      `,
+      to: process.env.RECEIVER || process.env.GMAIL_USER, // Send to company email
+      replyTo: email, // Allow replying to the customer
+      subject: subject,
+      html: emailContent,
     };
 
     await transporter.sendMail(mailOptions);

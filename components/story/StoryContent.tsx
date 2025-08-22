@@ -7,13 +7,17 @@ interface StoryContentProps {
   data?: {
     title?: string;
     richContent?: string;
-    sideImage?: string;
+    sideImage?: {
+      url?: string;
+    };
     sideImageAlt?: string;
     layout?: 'text-left' | 'text-right' | 'text-center';
   };
 }
 
 const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
+
+  console.log("data",data)
   const { t } = useTranslation();
 
   // Fallback content for when backend is not ready
@@ -46,70 +50,101 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
   };
 
   return (
-    <section className="bg-white py-16 md:py-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Section Title */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold font-playfair text-[#101820] mb-6">
-            {contentData.title}
-          </h2>
-          <div className="w-24 h-1 bg-[#CB7856] rounded-full mx-auto"></div>
+    <section className="relative bg-gradient-to-b from-white via-gray-50 to-white py-20 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-20 -left-20 w-40 h-40 bg-[#CB7856] opacity-5 rounded-full"></div>
+        <div className="absolute bottom-40 -right-20 w-60 h-60 bg-slate-200 opacity-30 rounded-full"></div>
+        <div className="absolute top-1/2 left-1/4 w-2 h-2 bg-[#CB7856] rounded-full animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-slate-400 rounded-full animate-pulse delay-1000"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Creative Section Title */}
+        <div className="text-center mb-20">
+          <div className="inline-block relative">
+            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold font-playfair text-[#101820] mb-6 relative">
+              {contentData.title}
+              {/* Creative underline */}
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-[#CB7856] to-transparent"></div>
+              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-16 h-px bg-[#CB7856] opacity-60"></div>
+            </h2>
+          </div>
         </div>
 
-        {/* Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Rich Text Content */}
-          <div className="order-2 lg:order-1">
-            <div 
-              className="prose prose-lg max-w-none text-[#101820] leading-relaxed"
-              dangerouslySetInnerHTML={renderRichContent(contentData.richContent || "")}
-              style={{
-                fontSize: '1.125rem',
-                lineHeight: '1.8'
-              }}
-            />
-          </div>
-
-          {/* Side Image */}
-          <div className="order-1 lg:order-2">
+        {/* Main Content with Creative Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mb-24">
+          {/* Rich Text Content - Takes up more space */}
+          <div className="lg:col-span-8 order-2 lg:order-1">
             <div className="relative">
-              <Image
-                src={contentData.sideImage || ""}
-                alt={contentData.sideImageAlt || "Our story"}
-                width={600}
-                height={800}
-                className="rounded-lg shadow-2xl object-cover w-full h-auto"
+              {/* Quote mark decoration */}
+              <div className="absolute -top-6 -left-6 text-8xl text-[#CB7856] opacity-20 font-serif leading-none">"</div>
+
+              <div
+                className="prose prose-xl max-w-none text-[#101820] leading-relaxed relative z-10"
+                dangerouslySetInnerHTML={renderRichContent(contentData.richContent || "")}
+                style={{
+                  fontSize: '1.2rem',
+                  lineHeight: '1.9'
+                }}
               />
-              {/* Decorative overlay */}
-              <div className="absolute -bottom-6 -right-6 w-full h-full border-4 border-[#CB7856] rounded-lg -z-10"></div>
+
+              <div className="mt-8 flex items-center">
+                <div className="w-12 h-px bg-[#CB7856]"></div>
+                <div className="w-3 h-3 bg-[#CB7856] rounded-full mx-4"></div>
+                <div className="flex-1 h-px bg-gradient-to-r from-[#CB7856] to-transparent"></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Additional Content Sections */}
-        <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="text-center p-8 bg-gray-50 rounded-lg">
-            <div className="w-16 h-16 bg-[#CB7856] rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-white text-2xl font-bold">20+</span>
-            </div>
-            <h3 className="text-xl font-bold font-playfair text-[#101820] mb-4">{t('story.yearsOfExcellence')}</h3>
-            <p className="text-gray-600 font-sans">{t('story.yearsDescription')}</p>
-          </div>
+          {/* Side Visual Element */}
+          <div className="lg:col-span-4 order-1 lg:order-2">
+            <div className="relative">
+              {(() => {
+                const imageUrl = typeof contentData.sideImage === 'object' && contentData.sideImage?.url
+                  ? contentData.sideImage.url
+                  : typeof contentData.sideImage === 'string'
+                  ? contentData.sideImage
+                  : null;
 
-          <div className="text-center p-8 bg-gray-50 rounded-lg">
-            <div className="w-16 h-16 bg-[#CB7856] rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-white text-2xl font-bold">50+</span>
+                return imageUrl ? (
+                  <div className="relative group">
+                    <Image
+                      src={imageUrl.startsWith('http') ? imageUrl : `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`}
+                      alt={contentData.sideImageAlt || "Our story"}
+                      width={400}
+                      height={600}
+                      className="rounded-2xl shadow-2xl object-cover w-full h-auto transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {/* Floating decorative elements */}
+                    <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#CB7856] rounded-full opacity-80"></div>
+                    <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-slate-300 rounded-full opacity-60"></div>
+                  </div>
+                ) : (
+                <div className="relative">
+                  {/* Creative placeholder with geometric design */}
+                  <div className="w-full h-[600px] bg-gradient-to-br from-slate-100 via-white to-slate-200 rounded-2xl shadow-2xl flex items-center justify-center relative overflow-hidden">
+                    {/* Geometric pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-10 left-10 w-20 h-20 border-2 border-[#CB7856] rounded-lg rotate-12"></div>
+                      <div className="absolute bottom-20 right-10 w-16 h-16 bg-[#CB7856] rounded-full"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-slate-300 rounded-full"></div>
+                    </div>
+                    <div className="text-center z-10">
+                      <div className="w-16 h-16 bg-[#CB7856] rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <div className="w-8 h-8 border-2 border-white rounded-full"></div>
+                      </div>
+                      <span className="text-slate-500 text-lg font-light">Visual Story</span>
+                      <p className="text-slate-400 text-sm mt-2">Coming Soon</p>
+                    </div>
+                  </div>
+                  {/* Floating decorative elements */}
+                  <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#CB7856] rounded-full opacity-80 animate-pulse"></div>
+                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-slate-300 rounded-full opacity-60 animate-pulse delay-500"></div>
+                </div>
+              );
+            })()}
             </div>
-            <h3 className="text-xl font-bold font-playfair text-[#101820] mb-4">{t('story.globalPartners')}</h3>
-            <p className="text-gray-600 font-sans">{t('story.partnersDescription')}</p>
-          </div>
-
-          <div className="text-center p-8 bg-gray-50 rounded-lg">
-            <div className="w-16 h-16 bg-[#CB7856] rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-white text-2xl font-bold">1000+</span>
-            </div>
-            <h3 className="text-xl font-bold font-playfair text-[#101820] mb-4">{t('story.projectsCompleted')}</h3>
-            <p className="text-gray-600 font-sans">{t('story.projectsDescription')}</p>
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@ async function GetInTouch({ params }: { params: { locale: string } }) {
     <div>
       <TouchHeading data={getInTouchSectionDetails} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-[50px] lg:p-[60px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-[50px] lg:p-[60px] max-w-7xl mx-auto w-full">
         <MessageFormComponent />
         <QuoteFormComponent
           locale={locale}
@@ -42,9 +42,9 @@ async function GetInTouch({ params }: { params: { locale: string } }) {
         />
       </div>
 
-      <div className="bg-[#fff] md:pb-10">
+      {/* <div className="bg-[#fff] md:pb-10">
         <DirectContactInfo data={getDirectContact} />
-      </div>
+      </div> */}
     </div>
   );
 }

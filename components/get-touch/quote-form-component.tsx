@@ -116,80 +116,82 @@ export default function QuoteFormComponent({
 
 
   return (
-    <div className="mx-auto bg-white border border-[#CB7856] rounded-xl p-6 md:p-8 shadow-md">
+    <div className="mx-auto bg-white border border-[#CB7856] rounded-xl p-6 md:p-8 shadow-md h-full flex flex-col">
       <div className="flex items-center gap-2 mb-2">
         <Image src={quote} height={23} width={23} alt="QuoteIcon" />
         <h3 className="text-2xl font-semibold">{data.formTitle.title}</h3>
       </div>
       <p className="text-sm mb-6">{data.formTitle.description}</p>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1">
+        <div className="space-y-5 flex-1">
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              id="name"
+              label={t('contact.name')}
+              type="text"
+              required
+              onChange={handleChange}
+            />
+            <FormInput
+              id="phone"
+              label={t('contact.phone')}
+              type="tel"
+              onChange={handleChange}
+            />
+          </div>
           <FormInput
-            id="name"
-            label={t('contact.name')}
+            id="email"
+            label={t('contact.email')}
+            type="email"
+            required
+            onChange={handleChange}
+          />
+
+          <div>
+            <label htmlFor="select Category" className="block mb-1">
+              {t('contact.selectCategory')} *
+            </label>
+            <select
+              id="select Category"
+              onChange={handleChange}
+              value={formValues["select Category"] || ""}
+              required
+              className="w-full border px-2 py-2 rounded"
+            >
+              <option value="">{t('contact.choose')}</option>
+              {Categories.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <FormInput
+            id="short_message"
+            label={t('contact.quoteRequirements')}
             type="text"
             required
             onChange={handleChange}
           />
+
+          {isLoading && <p>{t('contact.loadingProducts')}</p>}
+          {error && <p className="text-red-500">{error}</p>}
+
           <FormInput
-            id="phone"
-            label={t('contact.phone')}
-            type="tel"
+            id="message"
+            label={t('contact.message')}
+            type="textarea"
+            rows={5}
+            placeholder={t('contact.projectPlaceholder')}
             onChange={handleChange}
           />
         </div>
-        <FormInput
-          id="email"
-          label={t('contact.email')}
-          type="email"
-          required
-          onChange={handleChange}
-        />
-
-        <div>
-          <label htmlFor="select Category" className="block mb-1">
-            {t('contact.selectCategory')} *
-          </label>
-          <select
-            id="select Category"
-            onChange={handleChange}
-            value={formValues["select Category"] || ""}
-            required
-            className="w-full border px-2 py-2 rounded"
-          >
-            <option value="">{t('contact.choose')}</option>
-            {Categories.map((c) => (
-              <option key={c.slug} value={c.slug}>
-                {c.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <FormInput
-          id="short_message"
-          label={t('contact.quoteRequirements')}
-          type="text"
-          required
-          onChange={handleChange}
-        />
-
-        {isLoading && <p>{t('contact.loadingProducts')}</p>}
-        {error && <p className="text-red-500">{error}</p>}
-
-        <FormInput
-          id="message"
-          label={t('contact.message')}
-          type="textarea"
-          rows={5}
-          placeholder={t('contact.projectPlaceholder')}
-          onChange={handleChange}
-        />
 
         <button
           type="submit"
-          className="flex items-center justify-center gap-3 bg-[#CB7856] text-white py-3 rounded w-full"
+          className="flex items-center justify-center gap-3 bg-[#CB7856] text-white py-3 rounded w-full mt-6"
         >
           <Image src={blackdoc} height={23} width={23} alt="SubmitIcon" />
           {t('buttons.requestQuote')}
