@@ -124,6 +124,21 @@
     "hours": "Mo-Fr",
     "copyright": "© 2025 SteinMarine. Alle Rechte vorbehalten | Datenschutz | Nutzungsbedingungen"
   },
+  "product": {
+    "notFound": "Produkt nicht gefunden",
+    "availableSizes": "Verfügbare Größen",
+    "byM2": "Pro M2",
+    "byBox": "Pro Karton",
+    "taxShipping": "inkl. MwSt., zzgl. Versand",
+    "calculatePrice": "Berechnen Sie Ihren Preis",
+    "quantityM2": "Menge M2",
+    "quantityM2Calculated": "Menge M2 berechnet",
+    "quantityBox": "Menge Karton",
+    "byM2Total": "Pro M2 gesamt",
+    "taxShippingByBox": "inkl. MwSt., zzgl. Versand (Pro Karton)",
+    "deliveryInfo": "Mindestliefermengen gelten für jedes Produkt. Die geschätzte Lieferzeit beträgt 15 bis 45 Werktage, abhängig von Produkttyp und Bestellvolumen.",
+    "footerNote": "Auf Bestellung lieferbar (ST/Kflex)"
+  },
   "meta": {
     "steinMarine": "Stein Marine",
     "defaultDescription": "Premium Natursteine, Keramiken und Architektursteine für die Gestaltung außergewöhnlicher Räume."

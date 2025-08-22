@@ -124,6 +124,21 @@
     "hours": "Mon-Fri",
     "copyright": "© 2025 SteinMarine. All rights reserved | Privacy Policy | Terms of Service"
   },
+  "product": {
+    "notFound": "Product not found",
+    "availableSizes": "Available Sizes",
+    "byM2": "By M2",
+    "byBox": "By Box",
+    "taxShipping": "incl. VAT, excl. shipping",
+    "calculatePrice": "Calculate your price",
+    "quantityM2": "Quantity M2",
+    "quantityM2Calculated": "Quantity M2 calculated",
+    "quantityBox": "Quantity Box",
+    "byM2Total": "By M2 total",
+    "taxShippingByBox": "incl. VAT, excl. shipping (By Box)",
+    "deliveryInfo": "Minimum delivery quantities apply to each product. Estimated delivery time ranges from 15 to 45 working days, depending on product type and order volume.",
+    "footerNote": "Available on order (ST/Kflex)"
+  },
   "meta": {
     "steinMarine": "Stein Marine",
     "defaultDescription": "Premium natural stones, ceramics, and architectural bricks for crafting extraordinary spaces."

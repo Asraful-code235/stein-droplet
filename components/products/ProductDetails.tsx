@@ -9,6 +9,7 @@ import "swiper/css/thumbs";
 import "swiper/css/navigation";
 import { useParams, useRouter } from "next/navigation";
 import { getProductById } from "@/lib/api";
+import { useTranslation } from "@/lib/i18n";
 
 export default function ProductDetails() {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -22,6 +23,7 @@ export default function ProductDetails() {
   const router = useRouter();
   const params = useParams();
   const id = params.slug;
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!id || !params?.locale) return;
@@ -120,7 +122,7 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="min-h-screen p-8 bg-[#CFBDA0] pt-28 flex items-center justify-center">
-        <p className="text-xl">Product not found</p>
+        <p className="text-xl">{t('product.notFound')}</p>
       </div>
     );
   }
@@ -180,7 +182,7 @@ export default function ProductDetails() {
           <h1 className="text-2xl font-bold text-white">{product.name}</h1>
 
           <div>
-            <p className="font-semibold text-lg text-white font-sans mb-0">Available Sizes</p>
+            <p className="font-semibold text-lg text-white font-sans mb-0">{t('product.availableSizes')}</p>
             <div className="flex flex-wrap gap-2">
               {product.variations?.sizes?.flatMap((group: any) =>
                 group.sizes.map((size: any, i: number) => (
@@ -202,21 +204,21 @@ export default function ProductDetails() {
 
           <div className="text-sm space-y-1 text-white font-sans">
             <p>
-              <strong>By M2:</strong> € {pricePerM2}
-              <span className="text-gray-200 italic"> inkl. MwSt., zzgl. Versand</span>
+              <strong>{t('product.byM2')}:</strong> € {pricePerM2}
+              <span className="text-gray-200 italic"> {t('product.taxShipping')}</span>
             </p>
             <p>
-              <strong>By Box:</strong> € {pricePerBox}
+              <strong>{t('product.byBox')}:</strong> € {pricePerBox}
             </p>
           </div>
 
           {/* Quantity/Price Section */}
           <div>
-            <p className="font-semibold text-lg mb-2 text-white font-inter">Calculate your price</p>
+            <p className="font-semibold text-lg mb-2 text-white font-inter">{t('product.calculatePrice')}</p>
             <div className="space-y-3 max-w-[100%]">
               {/* Quantity M2 Input */}
               <div className="flex justify-between items-center">
-                <strong className="text-sm text-white">Quantity M2</strong>
+                <strong className="text-sm text-white">{t('product.quantityM2')}</strong>
                 <input
                   type="number"
                   min={0}
@@ -229,13 +231,13 @@ export default function ProductDetails() {
 
               {/* Calculated M2 from box */}
               <div className="text-sm text-white font-inter flex justify-between">
-                <strong>Quantity M2 calculated:</strong>
+                <strong>{t('product.quantityM2Calculated')}:</strong>
                 <p>{calculatedM2}</p>
               </div>
 
               {/* Box Quantity */}
               <div className="flex justify-between items-center">
-                <strong className="text-white">Quantity Box</strong>
+                <strong className="text-white">{t('product.quantityBox')}</strong>
                 <div className="flex items-center mt-1">
                   <button
                     onClick={() => setQuantityBox((prev) => Math.max(prev - 1, 1))}
@@ -259,27 +261,26 @@ export default function ProductDetails() {
               <div className="text-white space-y-1">
                 <div className="text-xl font-bold font-inter">
                   € {totalPriceM2}
-                  <div className="text-sm font-normal">By M2 total</div>
+                  <div className="text-sm font-normal">{t('product.byM2Total')}</div>
                 </div>
                 <div className="text-xl font-bold font-inter">
                   € {totalPriceBox}
                   <div className="text-sm font-normal">
-                    inkl. MwSt., zzgl. Versand (By Box)
+                    {t('product.taxShippingByBox')}
                   </div>
                 </div>
               </div>
 
               <p className="text-xs text-white font-inter">
-                Minimum delivery quantities apply to each product. Estimated delivery time ranges
-                from 15 to 45 working days, depending on product type and order volume.
+                {t('product.deliveryInfo')}
               </p>
 
               <div className="flex justify-center items-center w-full">
                 <button
-                  onClick={() => router.push("/get-in-touch")}
+                  onClick={() => router.push(`/${params.locale}/get-in-touch`)}
                   className="text-sm md:text-[14px] w-full mx-auto hover:bg-white hover:text-black border border-white rounded-lg p-2 font-semibold transition-colors text-white"
                 >
-                  Get A Quote
+                  {t('buttons.getQuote')}
                 </button>
               </div>
             </div>
@@ -287,7 +288,7 @@ export default function ProductDetails() {
 
           {/* Footer Note */}
           <div className="text-xs text-white font-inter pt-2 border-t">
-            Op bestelling leverbaar (ST/Kflex items-center gap-2 mt-1T)
+            {t('product.footerNote')}
           </div>
         </div>
       </div>

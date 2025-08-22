@@ -1022,65 +1022,138 @@ export async function getProductById({ locale, id }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  const res = await fetch(
-    `${apiURL}/products/${id}?locale=${locale}&populate=*`
-  );
+  try {
+    // First try the direct products endpoint
+    const res = await fetch(
+      `${apiURL}/products/${id}?locale=${locale}&populate=*`
+    );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch product");
+    if (res.ok) {
+      const { data } = await res.json();
+
+      const {
+        id: productId,
+        name,
+        slug,
+        description,
+        price,
+        category,
+        variations,
+        backgroundImage,
+        catalogue,
+      } = data;
+
+      // Add assetURL to each image and its formats
+      const backgroundImageWithFullUrls = backgroundImage.map((img: any) => ({
+        ...img,
+        url: assetURL + img.url,
+        formats: Object.fromEntries(
+          Object.entries(img.formats || {}).map(([key, format]: [string, any]) => [
+            key,
+            {
+              ...format,
+              url: assetURL + format.url,
+            },
+          ])
+        ),
+      }));
+
+      // Prepend assetURL to catalogue file if it exists
+      const updatedCatalogue = catalogue?.file
+        ? {
+            ...catalogue,
+            file: {
+              ...catalogue.file,
+              url: assetURL + catalogue.file.url,
+            },
+          }
+        : catalogue;
+
+      return {
+        id: productId,
+        name,
+        slug,
+        description,
+        price,
+        category,
+        variations,
+        backgroundImage: backgroundImageWithFullUrls,
+        catalogue: updatedCatalogue,
+      };
+    }
+  } catch (error) {
+    console.log("Direct products endpoint failed, trying categories endpoint");
   }
 
-  const { data } = await res.json();
+  // Fallback: Get product from categories endpoint
+  return await getProductByIdFromCategories({ locale, id });
+}
 
-  const {
-    id: productId,
-    name,
-    slug,
-    description,
-    price,
-    category,
-    variations,
-    backgroundImage,
-    catalogue,
-  } = data;
+export async function getProductByIdFromCategories({ locale, id }: any) {
+  const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
+  const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  // Add assetURL to each image and its formats
-  const backgroundImageWithFullUrls = backgroundImage.map((img: any) => ({
-    ...img,
-    url: assetURL + img.url,
-    formats: Object.fromEntries(
-      Object.entries(img.formats || {}).map(([key, format]: [string, any]) => [
-        key,
-        {
-          ...format,
-          url: assetURL + format.url,
-        },
-      ])
-    ),
-  }));
+  try {
+    // Get all categories with their products
+    const url = `${apiURL}/categories?locale=${locale}&populate[products][populate][mainImage]=*&populate[products][populate][gallery]=*&populate[products][populate][variations][populate][sizes][populate][sizes]=*&populate[products][populate][variations][populate][colors]=*&populate[products][populate][variations][populate][thicknesses]=*`;
 
-  // Prepend assetURL to catalogue file if it exists
-  const updatedCatalogue = catalogue?.file
-    ? {
-        ...catalogue,
-        file: {
-          ...catalogue.file,
-          url: assetURL + catalogue.file.url,
-        },
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch categories: ${res.status} ${res.statusText}`);
+    }
+
+    const json = await res.json();
+    const categories = json.data || [];
+
+    // Find the product across all categories
+    let foundProduct = null;
+    for (const category of categories) {
+      const product = category.products?.find((p: any) => p.id === parseInt(id));
+      if (product) {
+        foundProduct = product;
+        break;
       }
-    : catalogue;
+    }
 
-  return {
-    id: productId,
-    name,
-    slug,
-    description,
-    price,
-    category,
-    variations,
-    backgroundImage: backgroundImageWithFullUrls,
-    catalogue: updatedCatalogue,
-  };
+    if (!foundProduct) {
+      throw new Error(`Product with ID ${id} not found`);
+    }
+
+    // Transform the product data to match the expected format
+    const mainImage = foundProduct.mainImage;
+    const gallery = foundProduct.gallery || [];
+
+    // Create backgroundImage array from mainImage and gallery
+    const backgroundImage = [];
+    if (mainImage) {
+      backgroundImage.push({
+        ...mainImage,
+        url: `${assetURL}${mainImage.url}`,
+      });
+    }
+    gallery.forEach((img: any) => {
+      backgroundImage.push({
+        ...img,
+        url: `${assetURL}${img.url}`,
+      });
+    });
+
+    return {
+      id: foundProduct.id,
+      name: foundProduct.name,
+      slug: foundProduct.slug,
+      description: foundProduct.description,
+      price: foundProduct.price,
+      category: foundProduct.category,
+      variations: foundProduct.variations,
+      backgroundImage: backgroundImage,
+      catalogue: foundProduct.catalogue || null,
+    };
+  } catch (error) {
+    console.error("Error fetching product by ID from categories:", error);
+    throw error;
+  }
 }
 
 export async function getInTouchHeadingData({ locale }: any) {

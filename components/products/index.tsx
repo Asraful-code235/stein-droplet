@@ -7,6 +7,7 @@ import { SlidersHorizontal } from 'lucide-react';
 import collections from '@/assets/Collection1.png';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
+import Link from 'next/link';
 
 interface Product {
   id: string;
@@ -362,7 +363,8 @@ const Products = ({
             ) : (
               <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6'>
                 {products.map((product) => (
-                  <div
+                  <Link
+                  href={`/${locale}/products/${product.id}`}
                     key={product.id}
                     className='bg-white hover:cursor-pointer rounded-lg shadow overflow-hidden hover:shadow-lg transition'
                   >
@@ -382,7 +384,7 @@ const Products = ({
                         </div>
                       )}
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
