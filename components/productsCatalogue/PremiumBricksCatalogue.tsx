@@ -1,39 +1,35 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import graniteImg from "@/assets/brick2.png";
-import limestoneImg from "@/assets/brick4.png";
-import decorative from "@/assets/decoratove.png";
 
 const PremiumBricksCatalogue = ({ data }: any) => {
- const handleDownload = async (url: string) => {
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        // Optional: you can pass auth headers if needed
-      },
-    });
+  const handleDownload = async (url: string) => {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          // Optional: you can pass auth headers if needed
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to download file");
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+
+      const filename = url.split("/").pop() || "download.pdf";
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download error:", error);
     }
-
-    const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-
-    const filename = url.split("/").pop() || "download.pdf";
-    link.setAttribute("download", filename);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(blobUrl);
-  } catch (error) {
-    console.error("Download error:", error);
-  }
-};
+  };
 
   const handleView = (url: string) => {
     window.open(url, "_blank");
@@ -58,47 +54,49 @@ const PremiumBricksCatalogue = ({ data }: any) => {
           {data?.map((collection: any) => (
             <div
               key={collection.id}
-              className="bg-[#fff] border-black border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+              className="bg-[#fff] border-black border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col h-full"
             >
               <div className="h-70 relative">
-                          <div className="relative w-full h-[250px]">
-  <img
-    src={collection.image}
-    alt={collection.title}
-    className="object-cover max-h-[270px] brightness-90 w-full"
-  />
-</div>
+                <div className="relative w-full h-[250px]">
+                  <img
+                    src={collection.image}
+                    alt={collection.title}
+                    className="object-cover max-h-[270px] brightness-90 w-full"
+                  />
+                </div>
               </div>
 
-              <div className="p-6">
-                <h2
-                  className="text-[20px] font-semibold font-inter mb-2 text-[#101820]"
-                  style={{ letterSpacing: "-0.5px" }}
-                >
-                  {collection.title}
-                </h2>
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex-grow">
+                  <h2
+                    className="text-[20px] font-semibold font-inter mb-2 text-[#101820]"
+                    style={{ letterSpacing: "-0.5px" }}
+                  >
+                    {collection.title}
+                  </h2>
 
-                <p className="text-[14px] mb-4 font-inter text-[#101820]">
-                  {collection.description}
-                </p>
+                  <p className="text-[14px] mb-4 font-inter text-[#101820]">
+                    {collection.description}
+                  </p>
 
-                <h3 className="font-playfair text-[20px] font-semibold text-[#101820] mb-2">
-                  Key Features:
-                </h3>
-                <ul className="text-gray-600 space-y-1 mb-6">
-                  {collection.features.map((feature: any, index: any) => (
-                    <li key={index} className="flex items-center">
-                      <span className="mr-2 text-[18px] text-yellowDark">
-                        •
-                      </span>
-                      <span className="text-[#101820] text-[14px]">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                  <h3 className="font-playfair text-[20px] font-semibold text-[#101820] mb-2">
+                    Key Features:
+                  </h3>
+                  <ul className="text-gray-600 space-y-1 mb-6">
+                    {collection.features.map((feature: any, index: any) => (
+                      <li key={index} className="flex items-center">
+                        <span className="mr-2 text-[18px] text-yellowDark">
+                          •
+                        </span>
+                        <span className="text-[#101820] text-[14px]">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-               <div className="flex space-x-3 justify-center items-center">
+                <div className="flex space-x-3 justify-center items-center mt-auto">
                   <button
                     onClick={() => handleView(collection.fileUrl)}
                     className="flex items-center justify-center w-1/2 border border-[#CB7856] text-[#CB7856] rounded-md hover:bg-yellowDark/10 px-4 py-2 text-[14px] font-medium transition-colors gap-2"

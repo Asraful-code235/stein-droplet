@@ -24,14 +24,20 @@ const ProductsGrid = ({ data }: any) => {
         href={`/${locale}/products?category=${data.slug}`}
         className="relative flex gap-5 min-h-[250px] mt-[50px] sm:min-h-[300px] lg:min-h-[320px] md:min-h-[270px] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
       >
-        <Image
-          src={isValidSrc ? imageSrc : "/fallback-image.jpg"}
-          alt="Background Image"
-          fill
-          className="object-cover z-0"
-          priority
-          sizes="(min-width: 1280px) 1280px, 100vw"
-        />
+        {isValidSrc ? (
+          <Image
+            src={imageSrc}
+            alt="Background Image"
+            fill
+            className="object-cover z-0"
+            priority
+            sizes="(min-width: 1280px) 1280px, 100vw"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+            <span className="text-gray-600">No Image Available</span>
+          </div>
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent flex flex-col justify-end px-4 sm:px-5 md:px-6 py-6 sm:py-7 md:py-8 text-white z-10">
           <h3 className="text-base sm:text-lg md:text-lg font-bold mb-2 font-inter break-words leading-snug">

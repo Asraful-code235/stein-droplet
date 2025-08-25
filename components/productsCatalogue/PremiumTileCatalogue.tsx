@@ -58,7 +58,7 @@ const handleDownload = async (url: string) => {
           {data?.map((collection: any) => (
             <div
               key={collection.id}
-              className="bg-[#fff] border-black border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300"
+              className="bg-[#fff] border-black border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col h-full"
             >
               <div className="h-70 relative">
                 <div className="relative w-full h-[250px]">
@@ -70,35 +70,37 @@ const handleDownload = async (url: string) => {
                 </div>
               </div>
 
-              <div className="p-6">
-                <h2
-                  className="text-[20px] font-semibold font-inter mb-2 text-[#101820]"
-                  style={{ letterSpacing: "-0.5px" }}
-                >
-                  {collection.title}
-                </h2>
+              <div className="p-6 flex flex-col flex-grow">
+                <div className="flex-grow">
+                  <h2
+                    className="text-[20px] font-semibold font-inter mb-2 text-[#101820]"
+                    style={{ letterSpacing: "-0.5px" }}
+                  >
+                    {collection.title}
+                  </h2>
 
-                <p className="text-[14px] mb-4 font-inter text-[#101820]">
-                  {collection.description}
-                </p>
+                  <p className="text-[14px] mb-4 font-inter text-[#101820]">
+                    {collection.description}
+                  </p>
 
-                <h3 className="font-playfair text-[20px] font-semibold text-[#101820] mb-2">
-                  Key Features:
-                </h3>
-                <ul className="text-gray-600 space-y-1 mb-6">
-                  {collection.features.map((feature: any, index: any) => (
-                    <li key={index} className="flex items-center">
-                      <span className="mr-2 text-[18px] text-yellowDark">
-                        •
-                      </span>
-                      <span className="text-[#101820] text-[14px]">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                  <h3 className="font-playfair text-[20px] font-semibold text-[#101820] mb-2">
+                    Key Features:
+                  </h3>
+                  <ul className="text-gray-600 space-y-1 mb-6">
+                    {collection.features.map((feature: any, index: any) => (
+                      <li key={index} className="flex items-center">
+                        <span className="mr-2 text-[18px] text-yellowDark">
+                          •
+                        </span>
+                        <span className="text-[#101820] text-[14px]">
+                          {feature}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-                <div className="flex space-x-3 justify-center items-center">
+                <div className="flex space-x-3 justify-center items-center mt-auto">
                   <button
                     onClick={() => handleView(collection.fileUrl)}
                     className="flex items-center justify-center w-1/2 border border-[#CB7856] text-[#CB7856] rounded-md hover:bg-yellowDark/10 px-4 py-2 text-[14px] font-medium transition-colors gap-2"

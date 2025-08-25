@@ -36,30 +36,29 @@ const CollectionGrid = ({ collections, locale }: any) => {
     }
   };
   useEffect(() => {
-  const isMobile = window.innerWidth < 640;
-  if (!isMobile || !scrollRef.current) return;
+    const isMobile = window.innerWidth < 640;
+    if (!isMobile || !scrollRef.current) return;
 
-  const el = scrollRef.current;
-  const scrollAmount = el.firstElementChild?.clientWidth || 300;
-  const totalCards = collections.length;
-  let currentIndex = 0;
+    const el = scrollRef.current;
+    const scrollAmount = el.firstElementChild?.clientWidth || 300;
+    const totalCards = collections.length;
+    let currentIndex = 0;
 
-  const scrollNext = () => {
-    currentIndex += 1;
-    if (currentIndex >= totalCards) {
-      currentIndex = 0;
-    }
-    el.scrollTo({
-      left: currentIndex * (scrollAmount + 16), // card width + spacing
-      behavior: "smooth",
-    });
-  };
+    const scrollNext = () => {
+      currentIndex += 1;
+      if (currentIndex >= totalCards) {
+        currentIndex = 0;
+      }
+      el.scrollTo({
+        left: currentIndex * (scrollAmount + 16), // card width + spacing
+        behavior: "smooth",
+      });
+    };
 
-  const interval = setInterval(scrollNext, 2000);
+    const interval = setInterval(scrollNext, 2000);
 
-  return () => clearInterval(interval);
-}, [collections.length]);
-
+    return () => clearInterval(interval);
+  }, [collections.length]);
 
   const CollectionCard = ({
     backgroundImage,
@@ -75,15 +74,17 @@ const CollectionGrid = ({ collections, locale }: any) => {
       transition={{ duration: 0.6 }}
       className="relative flex-shrink-0 w-[288px] sm:w-full sm:flex gap-5 min-h-[250px] sm:min-h-[300px] lg:min-h-[320px] md:min-h-[270px] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
     >
-      <Image
-        src={backgroundImage}
-        alt={alt}
-        objectFit="cover"
-        sizes="100vw"
-        fill
-        className="z-0"
-        priority
-      />
+      {backgroundImage && (
+        <Image
+          src={backgroundImage}
+          alt={alt || "background"}
+          sizes="100vw"
+          fill
+          className="z-0 object-cover"
+          priority
+        />
+      )}
+
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent flex flex-col justify-end items-center px-4 sm:px-5 md:px-6 py-6 sm:py-7 md:py-8 text-white z-10">
         <h2 className="text-base sm:text-xl md:text-xl font-bold mb-2 font-inter break-words leading-snug">
           {highlight && title.includes(highlight) ? (
@@ -108,7 +109,7 @@ const CollectionGrid = ({ collections, locale }: any) => {
           onClick={() => router.push(`${locale}/catalogue/${slug}`)}
           className="bg-[#CB7856] hover:bg-white text-white px-4 py-2 md:px-5 md:py-2.5 rounded-full text-sm md:text-base font-medium hover:text-darkBlue transition-colors duration-300 w-fit group"
         >
-          {t('buttons.exploreCatalogue')}{" "}
+          {t("buttons.exploreCatalogue")}{" "}
           <span className="ml-1 group-hover:translate-x-1 transition-transform duration-300">
             →
           </span>

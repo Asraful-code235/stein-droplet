@@ -1,7 +1,7 @@
 // app/[lang]/page.tsx
 import {
   getAllCategories,
-  getAllCollections,
+  getAllCatalogues,
   getCollectionData,
   getDiscoveryData,
   getHeroData,
@@ -19,14 +19,14 @@ import { getTranslation } from "@/lib/i18n-server";
 export default async function Page({ params }: { params: { locale: string } }) {
   const { t } = getTranslation(params.locale);
 
-  const [heroData, categoriesData, discoveryData, projectShowcase, collectionData, collectionCards, projects] =
+  const [heroData, categoriesData, discoveryData, projectShowcase, collectionData, catalogueCards, projects] =
     await Promise.all([
       getHeroData(params.locale),
       getAllCategories(params.locale),
       getDiscoveryData(params.locale),
       projectShowcaseData(params.locale),
       getCollectionData({ locale: params.locale }),
-      getAllCollections(params.locale),
+      getAllCatalogues(params.locale),
       getAllProjects({ locale: params.locale }),
     ]);
 
@@ -49,7 +49,7 @@ export default async function Page({ params }: { params: { locale: string } }) {
         <QuoteSection discoveryData={discoveryData?.discoveryContent} />
         <GallerySection data={projectShowcase} projects={projects}   locale={params?.locale} />
         <Collections
-          collectionCards={collectionCards?.collections}
+          collectionCards={catalogueCards?.collections}
           data={collectionData}
           locale={params?.locale}
         />{" "}

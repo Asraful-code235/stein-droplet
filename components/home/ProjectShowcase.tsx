@@ -35,14 +35,18 @@ const GallerySection = ({
         {/* Background Image with smoother parallax and no gaps */}
         <div ref={backgroundParallax.ref} className="absolute inset-0 -z-10">
           <div className="relative w-full h-[110%]">
-            <Image
-              src={data?.images[0]?.backgroundImage}
-              alt="Background"
-              fill
-              className="brightness-50 object-cover"
-              priority
-              quality={100}
-            />
+            {data?.images?.[0]?.backgroundImage ? (
+              <Image
+                src={data.images[0].backgroundImage}
+                alt="Background"
+                fill
+                className="brightness-50 object-cover"
+                priority
+                quality={100}
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-800"></div>
+            )}
           </div>
         </div>
 
@@ -67,10 +71,12 @@ const GallerySection = ({
                 const title = (item?.title || item?.name || "").toString();
                 const subTitle = (item?.subTitle || "").toString();
 
+
+
                 return (
                   <Link
                     key={index}
-                    href={`/${locale}/projects?category=${title}`}
+                    href={`/${locale}/projects?category=${item?.heading?.slug || item?.slug || title}`}
                     className={`group relative h-64 sm:h-96 overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-500`}
                   >
                     <div className="relative w-full h-full">

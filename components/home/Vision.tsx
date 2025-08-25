@@ -24,22 +24,27 @@ const Collections = ({ data, details }: any) => {
     speed: 15,
     easing: "easeInQuad",
   });
+
+  console.log("data",data)
   
 
   return (
     <div className="relative h-fit lg:h-screen" ref={containerRef}>
       <div ref={backgroundParallax.ref} className="absolute inset-0 -z-10">
         <div className="relative w-full h-[120%]">
-          <Image
-            src={details?.premiumBackgroundImage}
-            alt="Background"
-            fill
-            className="brightness-50 object-cover"
-            priority
-                                          sizes="100vw"
-
-            quality={100}
-          />
+          {details?.premiumBackgroundImage ? (
+            <Image
+              src={details.premiumBackgroundImage}
+              alt="Background"
+              fill
+              className="brightness-50 object-cover"
+              priority
+              sizes="100vw"
+              quality={100}
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-800"></div>
+          )}
         </div>
       </div>
 

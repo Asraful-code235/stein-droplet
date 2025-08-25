@@ -92,26 +92,21 @@ export async function getAllCategories(locale: any) {
   // 1️⃣ Read from env
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
-  const [categoriesRes, collectionsRes, pagesRes] = await Promise.all([
-    fetch(`${apiURL}/categories?locale=${locale}&populate=*`),
-    fetch(`${apiURL}/collections?locale=${locale}&populate=backgroundImage`),
+  const [categoriesRes, pagesRes] = await Promise.all([
+    fetch(`${apiURL}/categories?locale=${locale}&populate[backgroundImage]=*`),
     fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
   ]);
   // 3️⃣ Error-check
   if (!categoriesRes.ok) {
     throw new Error(`Categories fetch failed: ${categoriesRes.statusText}`);
   }
-  if (!collectionsRes.ok) {
-    throw new Error(`Collections fetch failed: ${collectionsRes.statusText}`);
-  }
   if (!pagesRes.ok) {
     throw new Error(`Pages fetch failed: ${pagesRes.statusText}`);
   }
 
   // 4️⃣ JSON-parse in parallel
-  const [{ data: categoriesData }, { data: collectionsData }, { data: pagesData }] = await Promise.all([
+  const [{ data: categoriesData }, { data: pagesData }] = await Promise.all([
     categoriesRes.json(),
-    collectionsRes.json(),
     pagesRes.json(),
   ]);
 
@@ -132,16 +127,8 @@ export async function getAllCategories(locale: any) {
     },
   };
 
-  // 6️⃣ Create a map of collections by slug for easy lookup
-  const collectionsMap = new Map();
-  collectionsData.forEach((collection: any) => {
-    collectionsMap.set(collection.slug, collection);
-  });
-
-  // 7️⃣ Shape categories array with backgroundImage from collections
+  // 6️⃣ Shape categories array with backgroundImage from category itself
   const categories = categoriesData.map((category: any) => {
-    const matchingCollection = collectionsMap.get(category.slug);
-
     return {
       id: category.id,
       title: category.name,
@@ -151,11 +138,11 @@ export async function getAllCategories(locale: any) {
       createdAt: category.createdAt,
       updatedAt: category.updatedAt,
       publishedAt: category.publishedAt,
-      backgroundImage: matchingCollection?.backgroundImage?.url
-        ? `${assetURL}${matchingCollection.backgroundImage.url}`
+      backgroundImage: category?.backgroundImage?.url
+        ? `${assetURL}${category.backgroundImage.url}`
         : null,
-      backgroundImageAlt: matchingCollection?.backgroundImage?.alternativeText || "",
-      backgroundImageName: matchingCollection?.backgroundImage?.name || "",
+      backgroundImageAlt: category?.backgroundImage?.alternativeText || "",
+      backgroundImageName: category?.backgroundImage?.name || "",
     };
   });
   return {
@@ -196,40 +183,56 @@ export async function projectShowcaseData(locale: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  const [res, resImages] = await Promise.all([
+  const [res, resProjects] = await Promise.all([
     fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
-    fetch(
-      `${apiURL}/galleries?populate[card][populate]=backgroundImage&locale=${locale}`
-    ),
+    fetch(`${apiURL}/projects?locale=${locale}&populate=*`),
   ]);
 
-  if (!res?.ok || !resImages?.ok) {
+  if (!res?.ok || !resProjects?.ok) {
     throw new Error("Failed to fetch data");
   }
 
   const json = await res.json();
-  const json1 = await resImages.json();
+  const projectsJson = await resProjects.json();
+
+
+
+
 
   const showcaseSection = json?.data?.[0]?.Sections?.find(
     (section: any) => section.__component === "common.project-showcase"
   );
 
-  const cards = json1?.data?.flatMap((entry: any) =>
-    entry.card.map((card: any) => ({
-      id: card.id,
-      title: card.title,
-      description: card.description,
-      height: card.height,
-      backgroundImage: card.backgroundImage?.url
-        ? `${assetURL}${card.backgroundImage.url}`
-        : null,
-    }))
-  );
+  // Transform projects data to match the expected format
+  const projects = (projectsJson?.data || []).map((project: any) => {
+    const node = project.attributes ?? project;
+    const heading = node.heading ?? {};
+
+    // Get background image from heading.mainImage
+    let backgroundImage: string | null = null;
+    const mainImage = heading?.mainImage ?? node?.mainImage;
+    if (mainImage) {
+      if (typeof mainImage.url === "string") {
+        backgroundImage = assetURL + mainImage.url;
+      } else if (mainImage.data) {
+        const u = mainImage.data?.attributes?.url || mainImage.data?.url;
+        if (u) backgroundImage = assetURL + u;
+      }
+    }
+
+    return {
+      id: project.id,
+      title: heading.title || "",
+      slug: heading.slug || "",
+      description: heading.description || "",
+      backgroundImage,
+    };
+  });
 
   return {
     title: showcaseSection?.title || "",
     description: showcaseSection?.description || "",
-    images: cards || [],
+    images: projects || [],
   };
 }
 
@@ -734,7 +737,7 @@ export async function getAllProjects({ locale }: { locale: string }) {
 
   if (!apiURL) throw new Error("Missing NEXT_PUBLIC_BACKEND_URL or NEXT_PUBLIC_API_URL");
 
-  const urlWithLocale = `${apiURL}/projects?locale=${encodeURIComponent(locale)}`;
+  const urlWithLocale = `${apiURL}/projects?locale=${encodeURIComponent(locale)}&populate=*`;
   let res = await fetch(urlWithLocale, {
     headers: {
       ...getAuthHeaders(),
@@ -743,7 +746,7 @@ export async function getAllProjects({ locale }: { locale: string }) {
   });
   if (!res.ok) {
     // Fallback: try without locale (in case the content-type isn't i18n-enabled)
-    const urlNoLocale = `${apiURL}/projects`;
+    const urlNoLocale = `${apiURL}/projects?populate=*`;
     const retry = await fetch(urlNoLocale, {
       headers: { ...getAuthHeaders() },
       next: { revalidate: 60 },
@@ -765,6 +768,8 @@ export async function getAllProjects({ locale }: { locale: string }) {
     const title = heading.title ?? node.title ?? "";
     const subTitle = heading.subTitle ?? "";
     const description = heading.description ?? "";
+    const slug = heading.slug ?? `${title.toLowerCase()}-projects`;
+
     // Support both shapes:
     // 1) mainImage: { url: "/uploads/..." }
     // 2) mainImage: { data: { attributes: { url: "/uploads/..." } } }
@@ -778,10 +783,84 @@ export async function getAllProjects({ locale }: { locale: string }) {
         if (u) mainImageUrl = assetURL + u;
       }
     }
-    return { id: item.id, title, subTitle, description, mainImageUrl };
+
+    // Process gallery images
+    const rawGallery = node.gallery ?? node.gallery?.data ?? [];
+    let galleryArray: any[] = [];
+    if (Array.isArray(rawGallery)) {
+      galleryArray = rawGallery;
+    } else if (rawGallery?.data && Array.isArray(rawGallery.data)) {
+      galleryArray = rawGallery.data;
+    }
+
+    const gallery = galleryArray.map((img: any) => {
+      const imgNode = img.attributes ?? img;
+      return {
+        id: img.id,
+        url: imgNode.url ? `${assetURL}${imgNode.url}` : null,
+        alternativeText: imgNode.alternativeText || "",
+        name: imgNode.name || "",
+      };
+    });
+
+    // Process backgroundImage
+    let backgroundImageUrl: string | null = null;
+    const backgroundImage = node.backgroundImage;
+
+    if (backgroundImage) {
+      if (typeof backgroundImage.url === "string") {
+        backgroundImageUrl = assetURL + backgroundImage.url;
+      } else if (backgroundImage.data) {
+        const u = backgroundImage.data?.attributes?.url || backgroundImage.data?.url;
+        if (u) backgroundImageUrl = assetURL + u;
+      }
+    }
+
+    return {
+      id: item.id,
+      title,
+      subTitle,
+      description,
+      mainImageUrl,
+      heading: { title, subTitle, description, slug },
+      gallery,
+      backgroundImage: backgroundImageUrl
+    };
   });
 
   return items;
+}
+
+export async function getProjectByCategorySlug({
+  locale,
+  categorySlug,
+}: {
+  locale: string;
+  categorySlug: string;
+}) {
+  // Get all projects and filter by slug in JavaScript since the API filter doesn't work
+  const allProjects = await getAllProjects({ locale });
+
+  // Find project by slug
+  const project = allProjects.find((proj: any) => {
+    const projectSlug = proj?.heading?.slug;
+    return projectSlug === categorySlug;
+  });
+
+  if (!project) {
+    return null;
+  }
+
+  // Return the project in the expected format
+  return {
+    id: project.id,
+    title: (project as any).heading?.title || project.title || "",
+    subTitle: (project as any).heading?.subTitle || "",
+    description: (project as any).heading?.description || (project as any).description || "",
+    slug: (project as any).heading?.slug || "",
+    gallery: (project as any).gallery || [],
+    backgroundImage: (project as any).backgroundImage || null,
+  };
 }
 
 export async function getProjectByCategoryTitle({
@@ -850,26 +929,50 @@ export async function getProjectByCategoryTitle({
 export async function getCatalogueBySlug({ locale, category }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
 
-  const url = `${apiURL}/catalogues?locale=${locale}&filters[category][slug][$eq]=${category}&populate=*`;
-  const res = await fetch(url);
+  try {
+    // Fetch catalogues by slug directly (new structure doesn't need category lookup)
+    const url = `${apiURL}/catalogues?locale=${locale}&filters[catalogueSlug][$eq]=${category}&populate=*`;
+    const res = await fetch(url);
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch catalogue");
+    if (!res.ok) {
+      console.warn(`Failed to fetch catalogue: ${res.statusText}`);
+      return [];
+    }
+
+    const data = await res.json();
+
+    // Return empty array if no catalogue data
+    if (!data?.data || data.data.length === 0) {
+      console.warn(`No catalogue data found for slug: ${category}`);
+      return [];
+    }
+
+    const assetURL = apiURL.replace(/\/api\/?$/, "");
+
+    // Transform the new catalogue structure to match expected format
+    const transformedCollections = data?.data?.flatMap((catalogue: any) => {
+      // Return catalogue items instead of the catalogue itself
+      return catalogue.catalogueItems?.map((item: any) => {
+        return {
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          features: item.keyFeatures?.map((kf: any) => kf.option) || [],
+          image: item.thumbnail?.url ? `${assetURL}${item.thumbnail.url}` : "/placeholder.jpg",
+          fileUrl: item.file?.url ? `${assetURL}${item.file.url}` : null,
+          slug: item.slug,
+          // Include catalogue info for context
+          catalogueTitle: catalogue.catalogueTitle,
+          catalogueDescription: catalogue.catalogueDescription,
+        };
+      }) || [];
+    }) || [];
+
+    return transformedCollections;
+  } catch (error) {
+    console.error(`Error fetching catalogue for ${category}:`, error);
+    return [];
   }
-
-  const data = await res.json();
-  const assetURL = apiURL.replace(/\/api\/?$/, "");
-  const transformedCollections = data?.data?.map((item: any) => {
-    return {
-      id: item.id,
-      title: item.title,
-      description: item.description,
-      features: item.KeyFeatures?.map((kf: any) => kf.option) || [],
-      image: item.thumbnail ? assetURL + item.thumbnail.url : "/placeholder.jpg", // fallback image
-      fileUrl: item.file?.url ? assetURL + item.file.url : null,
-    };
-  });
-  return transformedCollections;
 }
 
 export async function getAboutUsData(locale: string) {
@@ -976,46 +1079,55 @@ export async function getCollectionData({ locale }: any) {
   };
 }
 
-export async function getAllCollections(locale: string) {
+export async function getAllCatalogues(locale: string) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  // 1️⃣ Fetch both collections and pages (with i18n)
-  const [collectionsRes] = await Promise.all([
-    fetch(`${apiURL}/collections?locale=${locale}&populate=backgroundImage`),
-  ]);
+  try {
+    // Fetch catalogues with new structure
+    const cataloguesRes = await fetch(`${apiURL}/catalogues?locale=${locale}&populate=*`);
 
-  // 2️⃣ Error handling
-  if (!collectionsRes.ok) {
-    throw new Error(`Failed to fetch data: ${collectionsRes.statusText}`);
-  }
+    if (!cataloguesRes.ok) {
+      console.warn(`Failed to fetch catalogues: ${cataloguesRes.statusText}`);
+      return { collections: [] };
+    }
 
-  const collectionsData = await collectionsRes.json();
+    const cataloguesData = await cataloguesRes.json();
 
-  // 3️⃣ Extract premium-products section
+    // Transform catalogues to match the expected format for Collections component
+    const collections = cataloguesData?.data?.map((item: any) => {
+      const image = item?.catalogueImage;
 
-  // 4️⃣ Normalize collections
-  const collections = collectionsData?.data?.map((item: any) => {
-    const image = item?.backgroundImage || item?.attributes?.backgroundImage;
+      return {
+        id: item.id,
+        title: item.catalogueTitle,
+        slug: item.catalogueSlug,
+        description: item.catalogueDescription,
+        documentId: item.documentId,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        publishedAt: item.publishedAt,
+        backgroundImage: image?.url ? `${assetURL}${image.url}` : null,
+        backgroundImageAlt: image?.alternativeText || "",
+        backgroundImageName: image?.name || "",
+        // Include catalogue items for future use
+        catalogueItems: item.catalogueItems || [],
+      };
+    }) || [];
 
     return {
-      id: item.id,
-      title: item.name || item.attributes?.name,
-      slug: item.slug || item.attributes?.slug,
-      description: item.description || item.attributes?.description,
-      documentId: item.documentId || item.attributes?.documentId,
-      createdAt: item.createdAt || item.attributes?.createdAt,
-      updatedAt: item.updatedAt || item.attributes?.updatedAt,
-      publishedAt: item.publishedAt || item.attributes?.publishedAt,
-      backgroundImage: image?.url ? `${assetURL}${image.url}` : null,
-      backgroundImageAlt: image?.alternativeText || "",
-      backgroundImageName: image?.name || "",
+      collections,
     };
-  });
+  } catch (error) {
+    console.error("Error fetching catalogues:", error);
+    return { collections: [] };
+  }
+}
 
-  return {
-    collections,
-  };
+// Keep the old function for backward compatibility (deprecated)
+export async function getAllCollections(locale: string) {
+  console.warn("getAllCollections is deprecated. Use getAllCatalogues instead.");
+  return getAllCatalogues(locale);
 }
 
 export async function getProductById({ locale, id }: any) {
@@ -1183,38 +1295,48 @@ export async function getInTouchHeadingData({ locale }: any) {
 
 export async function getCatalogueHeadingData({ locale }: any) {
   const apiURL = process.env.NEXT_PUBLIC_BACKEND_URL; // e.g. "http://127.0.0.1:1337/api"
-  const res = await fetch(
-    `${apiURL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
-  );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch Catalogue heading content");
+  try {
+    const res = await fetch(
+      `${apiURL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
+    );
+
+    if (!res.ok) {
+      console.warn(`Failed to fetch Catalogue heading content: ${res.statusText}`);
+      return null;
+    }
+
+    const data = await res.json();
+
+    const catalogueSectionDetails = data?.data?.[0]?.Sections?.find(
+      (section: any) => section.__component === "common.catalogue-heading"
+    );
+
+    if (!catalogueSectionDetails) {
+      console.warn("No catalogue heading section found");
+      return null;
+    }
+
+    const {
+      id: sectionId,
+      catalogueHeading: [
+        { id: headingId, title = "", subTitle = "", description = "" } = {},
+      ] = [],
+    } = catalogueSectionDetails;
+
+    return {
+      sectionId,
+      heading: {
+        id: headingId,
+        title,
+        subTitle,
+        description,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching catalogue heading data:", error);
+    return null;
   }
-
-  const data = await res.json();
-
-  const catalogueSectionDetails = data?.data?.[0]?.Sections?.find(
-    (section: any) => section.__component === "common.catalogue-heading"
-  );
-
-  if (!catalogueSectionDetails) return null;
-
-  const {
-    id: sectionId,
-    catalogueHeading: [
-      { id: headingId, title = "", subTitle = "", description = "" } = {},
-    ] = [],
-  } = catalogueSectionDetails;
-
-  return {
-    sectionId,
-    heading: {
-      id: headingId,
-      title,
-      subTitle,
-      description,
-    },
-  };
 }
 
 export async function getImpressumData({ locale }: any) {

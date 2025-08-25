@@ -2,16 +2,10 @@
 
 import Image from "next/image";
 import React, { useRef } from "react";
-import collection1 from "@/assets/Collection1.png";
-import collection2 from "@/assets/Collection2.png";
-import collection3 from "@/assets/Collection3.png";
-import collections from "@/assets/collections.png";
 import CollectionGrid from "./CollectionGrid";
 import { useParallax } from "react-scroll-parallax";
 
-
-
-const Collections = ({ data,collectionCards ,locale}: any) => {
+const Collections = ({ data, collectionCards, locale }: any) => {
   const containerRef = useRef(null);
 
   const backgroundParallax: any = useParallax({
@@ -32,14 +26,17 @@ const Collections = ({ data,collectionCards ,locale}: any) => {
       {/* Background image with parallax */}
       <div ref={backgroundParallax.ref} className="absolute inset-0 -z-10">
         <div className="relative w-full h-[110%]">
-          <Image
-            src={data?.backgroundImage?.assetUrl}
-            alt="Background"
-            fill
-            className="brightness-50 object-cover"
-            priority
-            quality={100}
-          />
+          {data?.backgroundImage?.assetUrl ? (
+            <Image
+              src={data?.backgroundImage?.assetUrl}
+              alt="Background"
+              fill
+              className="brightness-50 object-cover"
+              priority
+              quality={100}
+            />
+          ) : null}
+        
         </div>
       </div>
 
@@ -56,7 +53,7 @@ const Collections = ({ data,collectionCards ,locale}: any) => {
             </span>
           </h2>
           <p className="text-white font-sans md:text-[15px] lg:text-[18px] md:max-w-2xl lg:max-w-3xl mx-auto mt-6">
-         {data?.collectionComponent?.description}
+            {data?.collectionComponent?.description}
           </p>
         </div>
 

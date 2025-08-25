@@ -137,7 +137,7 @@ export default function ProductDetails() {
             thumbs={{ swiper: thumbsSwiper as any }}
             navigation={true}
             modules={[Thumbs, Navigation]}
-            className="w-full border relative"
+            className="w-full border relative h-[400px] md:h-[500px] lg:h-[600px]"
           >
             {productImages?.map((src: any, i: number) => (
               <SwiperSlide key={i}>
@@ -163,13 +163,13 @@ export default function ProductDetails() {
           >
             {productImages?.map((src: any, i: number) => (
               <SwiperSlide key={i}>
-                <div className="overflow-hidden border rounded">
+                <div className="overflow-hidden border rounded h-[100px] md:h-[120px] lg:h-[150px]">
                   <img
                     src={src?.url}
                     alt={`Thumbnail ${i + 1}`}
                     width={100}
                     height={100}
-                    className="w-full h-full min-h-[150px] max-h-[150px] object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </SwiperSlide>
