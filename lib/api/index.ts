@@ -238,6 +238,30 @@ export async function projectShowcaseData(locale: any) {
     }
   }
 
+  // Fallback: if no background image for current locale, try to get from English locale
+  if (!showcaseBackgroundImage && locale !== 'en') {
+    try {
+      const fallbackRes = await fetch(`${apiURL}/pages?locale=en&populate[Sections][populate][backgroundImage]=*`);
+      if (fallbackRes.ok) {
+        const fallbackJson = await fallbackRes.json();
+        const fallbackShowcase = fallbackJson?.data?.[0]?.Sections?.find(
+          (section: any) => section.__component === "common.project-showcase"
+        );
+        const fallbackBgImage = fallbackShowcase?.backgroundImage;
+        if (fallbackBgImage) {
+          if (typeof fallbackBgImage.url === "string") {
+            showcaseBackgroundImage = assetURL + fallbackBgImage.url;
+          } else if (fallbackBgImage.data) {
+            const u = fallbackBgImage.data?.attributes?.url || fallbackBgImage.data?.url;
+            if (u) showcaseBackgroundImage = assetURL + u;
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to fetch fallback background image:', error);
+    }
+  }
+
   return {
     title: showcaseSection?.title || "",
     description: showcaseSection?.description || "",
