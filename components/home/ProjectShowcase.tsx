@@ -35,9 +35,9 @@ const GallerySection = ({
         {/* Background Image with smoother parallax and no gaps */}
         <div ref={backgroundParallax.ref} className="absolute inset-0 -z-10">
           <div className="relative w-full h-[110%]">
-            {data?.images?.[0]?.backgroundImage ? (
+            {data?.backgroundImage ? (
               <Image
-                src={data.images[0].backgroundImage}
+                src={data.backgroundImage}
                 alt="Background"
                 fill
                 className="brightness-50 object-cover"

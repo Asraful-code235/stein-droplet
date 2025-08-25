@@ -104,7 +104,7 @@ export default async function GalleryPage({
   ]);
 
   // Use first image from showcase as background
-  const firstShowcaseImage = showcase?.images?.[0]?.backgroundImage;
+  const firstShowcaseImage = showcase?.backgroundImage;
 
   const first = {
     title: showcase?.title || "",

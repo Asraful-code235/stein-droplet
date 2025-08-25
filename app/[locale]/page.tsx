@@ -39,6 +39,8 @@ export default async function Page({ params }: { params: { locale: string } }) {
   }
 
   const { categories, details } = categoriesData;
+
+  console.log("projectShowcase",projectShowcase)
   return (
     <ParallaxWrapper>
       <div className="relative">

@@ -195,13 +195,10 @@ export async function projectShowcaseData(locale: any) {
   const json = await res.json();
   const projectsJson = await resProjects.json();
 
-
-
-
-
   const showcaseSection = json?.data?.[0]?.Sections?.find(
     (section: any) => section.__component === "common.project-showcase"
   );
+
 
   // Transform projects data to match the expected format
   const projects = (projectsJson?.data || []).map((project: any) => {
@@ -229,9 +226,22 @@ export async function projectShowcaseData(locale: any) {
     };
   });
 
+  // Get background image from showcaseSection
+  let showcaseBackgroundImage: string | null = null;
+  const bgImage = showcaseSection?.backgroundImage;
+  if (bgImage) {
+    if (typeof bgImage.url === "string") {
+      showcaseBackgroundImage = assetURL + bgImage.url;
+    } else if (bgImage.data) {
+      const u = bgImage.data?.attributes?.url || bgImage.data?.url;
+      if (u) showcaseBackgroundImage = assetURL + u;
+    }
+  }
+
   return {
     title: showcaseSection?.title || "",
     description: showcaseSection?.description || "",
+    backgroundImage: showcaseBackgroundImage,
     images: projects || [],
   };
 }
