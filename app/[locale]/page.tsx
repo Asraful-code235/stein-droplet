@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: { locale: string } }) {
   return (
     <ParallaxWrapper>
       <div className="relative">
-        {heroData && <Hero data={heroData} />}
+        {heroData && <Hero data={heroData}  locale={params?.locale} />}
         {details?.premiumDetails && (
           <Vision details={details} data={categories} />
         )}

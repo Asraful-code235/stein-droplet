@@ -121,6 +121,7 @@ export default function MessageFormComponent() {
               onChange={handleChange}
             />
           </div>
+
           <FormInput
             id="email"
             label={t("contact.email")}
@@ -128,6 +129,24 @@ export default function MessageFormComponent() {
             required
             onChange={handleChange}
           />
+          <div className="opacity-0">
+            <FormInput
+              id="email"
+              label={t("contact.email")}
+              type="email"
+              required
+              onChange={handleChange}
+            />
+          </div>
+          <div className="opacity-0">
+            <FormInput
+              id="email"
+              label={t("contact.email")}
+              type="email"
+              required
+              onChange={handleChange}
+            />
+          </div>
           <FormInput
             id="message"
             label={t("contact.message")}

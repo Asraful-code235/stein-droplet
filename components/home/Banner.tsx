@@ -2,8 +2,9 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-const Banner = ({ data }: any) => {
+const Banner = ({ data ,locale }: any) => {
   return (
     <section className="relative w-full h-fit lg:h-screen flex items-center justify-center py-20">
       <div className="absolute inset-0 overflow-hidden">
@@ -35,12 +36,12 @@ const Banner = ({ data }: any) => {
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto justify-center">
-            <div className="bg-[#CB7856] text-white font-semibold px-8 py-3 rounded-full min-w-[200px] text-center">
+            <Link href={`${locale}/#collections`} className="bg-[#CB7856] text-white font-semibold px-8 py-3 rounded-full min-w-[200px] text-center">
               {data?.buttonOneTitle}
-            </div>
-            <div className="bg-white text-[#CB7856] font-semibold px-8 py-3 rounded-full border-2 border-[#CB7856] min-w-[200px] text-center">
+            </Link>
+            <Link href={`${locale}/get-in-touch`}  className="bg-white text-[#CB7856] font-semibold px-8 py-3 rounded-full border-2 border-[#CB7856] min-w-[200px] text-center">
               {data?.buttonTwoTitle}
-            </div>
+            </Link>
           </div>
         </div>
       </div>

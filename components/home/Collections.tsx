@@ -20,6 +20,7 @@ const Collections = ({ data, collectionCards, locale }: any) => {
   });
   return (
     <div
+      id="collections"
       className="relative bg-[#fff]  bg-opacity-15 h-fit lg:h-screen"
       ref={containerRef}
     >
@@ -36,7 +37,6 @@ const Collections = ({ data, collectionCards, locale }: any) => {
               quality={100}
             />
           ) : null}
-        
         </div>
       </div>
 
