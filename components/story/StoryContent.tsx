@@ -17,7 +17,6 @@ interface StoryContentProps {
 
 const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
 
-  console.log("data",data)
   const { t } = useTranslation();
 
   // Fallback content for when backend is not ready

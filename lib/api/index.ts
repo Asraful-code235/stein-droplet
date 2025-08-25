@@ -244,7 +244,6 @@ export async function getProductsByCategorySlug({ categorySlug, locale }: any) {
     // Use the categories endpoint with slug filter to get the category and its products
     const url = `${apiURL}/categories?locale=${locale}&filters[slug][$eq]=${encodeURIComponent(categorySlug)}&populate[products][populate][mainImage]=*&populate[products][populate][gallery]=*&populate[products][populate][variations][populate][sizes][populate][sizes]=*&populate[products][populate][variations][populate][colors]=*&populate[products][populate][variations][populate][thicknesses]=*`;
 
-    console.log("Fetching category with products from:", url);
 
     const res = await fetch(url);
 
@@ -255,7 +254,6 @@ export async function getProductsByCategorySlug({ categorySlug, locale }: any) {
     }
 
     const json = await res.json();
-    console.log("Category API Response:", json);
 
     if (!json.data || json.data.length === 0) {
       console.warn("No category found for slug:", categorySlug);

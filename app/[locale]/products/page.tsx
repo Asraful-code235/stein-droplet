@@ -36,12 +36,6 @@ export default async function ProductsPage({ searchParams, params }: Props) {
     : await getAllProducts({ locale: params.locale });
 
 
-  // Log the first product's structure to understand the data
-  if (products.length > 0) {
-    console.log("First product structure:", JSON.stringify(products[0], null, 2));
-  }
-
-
   return (
     <Products
       colors={colors}
