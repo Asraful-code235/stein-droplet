@@ -8,7 +8,7 @@ import "swiper/css";
 import "swiper/css/thumbs";
 import "swiper/css/navigation";
 import { useParams, useRouter } from "next/navigation";
-import { getProductById } from "@/lib/api";
+import { useProductById } from "@/hooks/useApi";
 import { useTranslation } from "@/lib/i18n";
 
 export default function ProductDetails() {
@@ -16,38 +16,25 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantityM2, setQuantityM2] = useState<number>(1);
   const [quantityBox, setQuantityBox] = useState<number>(1);
-  const [product, setProduct] = useState<any>(null);
-  const [productImages, setProductImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
   const params = useParams();
-  const id = params.slug;
+  const id = params.slug as string;
+  const locale = params.locale as string;
   const { t } = useTranslation();
 
+  // Use TanStack Query for real-time data
+  const { data: product, isLoading, error } = useProductById(locale, id);
+
+  // Set initial size when product loads
   useEffect(() => {
-    if (!id || !params?.locale) return;
-
-    const fetchProduct = async () => {
-      setIsLoading(true);
-      try {
-        const data = await getProductById({ locale: params?.locale, id });
-        setProduct(data);
-        setProductImages(data?.backgroundImage || []);
-        if (data?.variations?.sizes?.length > 0) {
-          const firstSize = data.variations.sizes[0];
-          if (firstSize.sizes?.length > 0) {
-            setSelectedSize(firstSize.sizes[0].size);
-          }
-        }
-      } catch (err) {
-      } finally {
-        setIsLoading(false);
+    if (product?.variations?.sizes?.length > 0) {
+      const firstSize = product!.variations.sizes[0];
+      if (firstSize.sizes?.length > 0 && !selectedSize) {
+        setSelectedSize(firstSize.sizes[0].size);
       }
-    };
-
-    fetchProduct();
-  }, [id, params?.locale]);
+    }
+  }, [product, selectedSize]);
 
   const getCurrentSizeDetails = () => {
     if (!product?.variations?.sizes) return null;
@@ -119,6 +106,22 @@ export default function ProductDetails() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen p-8 bg-[#CFBDA0] pt-28 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-red-600 mb-4">Error loading product</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="min-h-screen p-8 bg-[#CFBDA0] pt-28 flex items-center justify-center">
@@ -137,17 +140,17 @@ export default function ProductDetails() {
             thumbs={{ swiper: thumbsSwiper as any }}
             navigation={true}
             modules={[Thumbs, Navigation]}
-            className="w-full border relative h-[400px] md:h-[500px] lg:h-[600px]"
+            className="w-full border relative h-[500px]"
           >
-            {productImages?.map((src: any, i: number) => (
+            {product?.backgroundImage?.map((src: any, i: number) => (
               <SwiperSlide key={i}>
-                <img
-                  src={src?.url}
-                  alt={`Tile ${i + 1}`}
-                  width={670}
-                  height={670}
-                  className="w-full h-full object-cover cursor-pointer"
-                />
+                <div className="w-full h-[500px] overflow-hidden">
+                  <img
+                    src={src?.url}
+                    alt={`${product.name} ${i + 1}`}
+                    className="w-full h-full object-cover cursor-pointer"
+                  />
+                </div>
               </SwiperSlide>
             ))}
           </Swiper>
@@ -161,15 +164,13 @@ export default function ProductDetails() {
             modules={[Thumbs]}
             className="mt-4"
           >
-            {productImages?.map((src: any, i: number) => (
+            {product?.backgroundImage?.map((src: any, i: number) => (
               <SwiperSlide key={i}>
-                <div className="overflow-hidden border rounded h-[100px] md:h-[120px] lg:h-[150px]">
+                <div className="overflow-hidden border rounded h-[120px] w-full">
                   <img
                     src={src?.url}
                     alt={`Thumbnail ${i + 1}`}
-                    width={100}
-                    height={100}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
                   />
                 </div>
               </SwiperSlide>
@@ -179,7 +180,14 @@ export default function ProductDetails() {
 
         {/* Product Info Panel */}
         <div className="space-y-6 bg-[#CB7856] p-6 rounded shadow-md">
-          <h1 className="text-2xl font-bold text-white">{product.name}</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-3">{product.name}</h1>
+            {product.description && (
+              <div className="text-white text-sm leading-relaxed mb-4">
+                <div dangerouslySetInnerHTML={{ __html: product.description }} />
+              </div>
+            )}
+          </div>
 
           <div>
             <p className="font-semibold text-lg text-white font-sans mb-0">
@@ -207,10 +215,12 @@ export default function ProductDetails() {
           <div className="text-sm space-y-1 text-white font-sans">
             <p>
               <strong>{t('product.byM2')}:</strong> € {pricePerM2}
-              <span className="text-gray-200 italic"> {product?.taxInfo || t('product.taxShipping')}</span>
             </p>
             <p>
               <strong>{t('product.byBox')}:</strong> € {pricePerBox}
+            </p>
+            <p className="text-gray-200 italic text-xs">
+              {product?.taxInfo || t('product.taxShipping')}
             </p>
           </div>
 
@@ -276,7 +286,7 @@ export default function ProductDetails() {
                 <div className="text-xl font-bold font-inter">
                   € {totalPriceBox}
                   <div className="text-sm font-normal">
-                    {product?.taxInfo || t('product.taxShipping')} ({t('product.byBox')})
+                    {t('product.byBox')} total
                   </div>
                 </div>
               </div>
@@ -302,7 +312,11 @@ export default function ProductDetails() {
 
           {/* Footer Note */}
           <div className="text-xs text-white font-inter pt-2 border-t">
-            {t('product.footerNote')}
+            {product?.footerNote ? (
+              <div dangerouslySetInnerHTML={{ __html: product.footerNote }} />
+            ) : (
+              t('product.footerNote')
+            )}
           </div>
         </div>
       </div>

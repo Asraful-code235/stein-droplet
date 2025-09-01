@@ -27,9 +27,26 @@ function getApiBase(): string {
     return noQuery.replace(/\/$/, "") + "/api";
   }
 }
+
+// Utility function to create fetch options with cache busting
+function getNoCacheOptions(additionalHeaders: Record<string, string> = {}) {
+  return {
+    cache: 'no-store' as const,
+    headers: {
+      ...additionalHeaders,
+    },
+  };
+}
+
+// Add cache busting parameter to URL
+function addCacheBuster(url: string): string {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}_t=${Date.now()}`;
+}
 export async function getVisionData(locale: any) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pages?locale=${locale}`
+    addCacheBuster(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pages?locale=${locale}`),
+    getNoCacheOptions()
   );
 
   if (!res.ok) throw new Error("Failed to fetch Growth content");
@@ -55,7 +72,8 @@ export async function getVisionData(locale: any) {
 
 export async function getHeroData(locale: any) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pages?locale=${locale}&populate[Sections][populate]=*`
+    addCacheBuster(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pages?locale=${locale}&populate[Sections][populate]=*`),
+    getNoCacheOptions()
   );
 
   if (!res.ok) throw new Error("Failed to fetch Growth content");
@@ -93,8 +111,8 @@ export async function getAllCategories(locale: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
   const assetURL = apiURL.replace(/\/api\/?$/, "");
   const [categoriesRes, pagesRes] = await Promise.all([
-    fetch(`${apiURL}/categories?locale=${locale}&populate[backgroundImage]=*`),
-    fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
+    fetch(addCacheBuster(`${apiURL}/categories?locale=${locale}&populate[backgroundImage]=*`), getNoCacheOptions()),
+    fetch(addCacheBuster(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`), getNoCacheOptions()),
   ]);
   // 3️⃣ Error-check
   if (!categoriesRes.ok) {
@@ -184,8 +202,8 @@ export async function projectShowcaseData(locale: any) {
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
   const [res, resProjects] = await Promise.all([
-    fetch(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`),
-    fetch(`${apiURL}/projects?locale=${locale}&populate=*`),
+    fetch(addCacheBuster(`${apiURL}/pages?locale=${locale}&populate[Sections][populate]=*`), getNoCacheOptions()),
+    fetch(addCacheBuster(`${apiURL}/projects?locale=${locale}&populate=*`), getNoCacheOptions()),
   ]);
 
   if (!res?.ok || !resProjects?.ok) {
@@ -336,7 +354,7 @@ export async function getAllProducts({ locale }: { locale: string }) {
     const url = `${apiURL}/categories?locale=${locale}&populate[products][populate][mainImage]=*&populate[products][populate][gallery]=*&populate[products][populate][variations][populate][sizes][populate][sizes]=*&populate[products][populate][variations][populate][colors]=*&populate[products][populate][variations][populate][thicknesses]=*`;
     console.log("Fetching all products via categories from:", url);
 
-    const res = await fetch(url);
+    const res = await fetch(addCacheBuster(url), getNoCacheOptions());
 
     if (!res.ok) {
       const errorText = await res.text();
@@ -439,7 +457,7 @@ export async function getAllSizes({ locale }: any) {
 export async function getAllThickness({ locale }: any) {
   const apiURL = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`;
 
-  const res = await fetch(`${apiURL}/thicknesses?locale=${locale}&populate=*`);
+  const res = await fetch(addCacheBuster(`${apiURL}/thicknesses?locale=${locale}&populate=*`), getNoCacheOptions());
 
   if (!res.ok) {
     throw new Error("Failed to fetch thickness");
@@ -770,18 +788,20 @@ export async function getAllProjects({ locale }: { locale: string }) {
   if (!apiURL) throw new Error("Missing NEXT_PUBLIC_BACKEND_URL or NEXT_PUBLIC_API_URL");
 
   const urlWithLocale = `${apiURL}/projects?locale=${encodeURIComponent(locale)}&populate=*`;
-  let res = await fetch(urlWithLocale, {
+  let res = await fetch(addCacheBuster(urlWithLocale), {
     headers: {
       ...getAuthHeaders(),
     },
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) {
     // Fallback: try without locale (in case the content-type isn't i18n-enabled)
     const urlNoLocale = `${apiURL}/projects?populate=*`;
-    const retry = await fetch(urlNoLocale, {
-      headers: { ...getAuthHeaders() },
-      next: { revalidate: 60 },
+    const retry = await fetch(addCacheBuster(urlNoLocale), {
+      headers: {
+        ...getAuthHeaders(),
+      },
+      cache: 'no-store',
     });
     if (!retry.ok) {
       let msg = "";
@@ -910,17 +930,19 @@ export async function getProjectByCategoryTitle({
   const urlWithLocale = `${apiURL}/projects?locale=${encodeURIComponent(
     locale
   )}&filters[heading][title][$eq]=${encodeURIComponent(categoryTitle)}`;
-  let res = await fetch(urlWithLocale, {
+  let res = await fetch(addCacheBuster(urlWithLocale), {
     headers: {
       ...getAuthHeaders(),
     },
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
   if (!res.ok) {
     const urlNoLocale = `${apiURL}/projects?filters[heading][title][$eq]=${encodeURIComponent(categoryTitle)}`;
-    const retry = await fetch(urlNoLocale, {
-      headers: { ...getAuthHeaders() },
-      next: { revalidate: 60 },
+    const retry = await fetch(addCacheBuster(urlNoLocale), {
+      headers: {
+        ...getAuthHeaders(),
+      },
+      cache: 'no-store',
     });
     if (!retry.ok) {
       let msg = "";
@@ -1169,7 +1191,8 @@ export async function getProductById({ locale, id }: any) {
   try {
     // First try the direct products endpoint
     const res = await fetch(
-      `${apiURL}/products/${id}?locale=${locale}&populate=*`
+      addCacheBuster(`${apiURL}/products/${id}?locale=${locale}&populate=*`),
+      getNoCacheOptions()
     );
 
     if (res.ok) {
@@ -1188,6 +1211,7 @@ export async function getProductById({ locale, id }: any) {
         // Only essential dynamic fields
         deliveryInfo,
         taxInfo,
+        footerNote,
       } = data;
 
       // Add assetURL to each image and its formats
@@ -1229,6 +1253,7 @@ export async function getProductById({ locale, id }: any) {
         // Only essential dynamic fields from Strapi
         deliveryInfo,
         taxInfo,
+        footerNote,
       };
     }
   } catch (error) {
@@ -1302,6 +1327,7 @@ export async function getProductByIdFromCategories({ locale, id }: any) {
       // Only essential dynamic fields from Strapi
       deliveryInfo: foundProduct.deliveryInfo,
       taxInfo: foundProduct.taxInfo,
+      footerNote: foundProduct.footerNote,
     };
   } catch (error) {
     console.error("Error fetching product by ID from categories:", error);

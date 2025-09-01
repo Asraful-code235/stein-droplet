@@ -9,6 +9,7 @@ import CookieBanner from "@/components/cookies";
 import { getLayoutData } from "@/lib/api";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import QueryProvider from "@/providers/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const sourceSans = Source_Sans_3({
@@ -34,7 +35,7 @@ export default async function RootLayout({
 }) {
   const Data = await getLayoutData(params?.locale);
   return (
-    <>
+    <QueryProvider>
       <Navbar data={Data} locale={params?.locale || "en"} />
       <ParallaxInitializer>
         <ToastContainer position="top-right" autoClose={5000} />
@@ -43,6 +44,6 @@ export default async function RootLayout({
       </ParallaxInitializer>
       <CookieBanner />
       <Footer data={Data} />
-    </>
+    </QueryProvider>
   );
 }
