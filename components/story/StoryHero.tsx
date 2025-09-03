@@ -50,6 +50,8 @@ const StoryHero: React.FC<StoryHeroProps> = ({ data }) => {
               className="object-cover brightness-30"
               priority
               decoding="async"
+              sizes="100vw"
+              quality={75}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
