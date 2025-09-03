@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Swiper as SwiperOriginal, SwiperSlide as SwiperSlideOriginal } from "swiper/react";
+import {
+  Swiper as SwiperOriginal,
+  SwiperSlide as SwiperSlideOriginal,
+} from "swiper/react";
 import { Navigation, Thumbs } from "swiper/modules";
 import type { SwiperProps, SwiperSlideProps } from "swiper/react";
 import "swiper/css";
@@ -69,8 +72,12 @@ export default function ProductDetails() {
   const totalPriceM2 = (quantityM2 * pricePerM2).toFixed(2);
   const totalPriceBox = (quantityBox * pricePerBox).toFixed(2);
 
-  const Swiper = SwiperOriginal as React.FC<SwiperProps & { children?: React.ReactNode }>;
-  const SwiperSlide = SwiperSlideOriginal as React.FC<SwiperSlideProps & { children?: React.ReactNode }>;
+  const Swiper = SwiperOriginal as React.FC<
+    SwiperProps & { children?: React.ReactNode }
+  >;
+  const SwiperSlide = SwiperSlideOriginal as React.FC<
+    SwiperSlideProps & { children?: React.ReactNode }
+  >;
 
   if (isLoading) {
     return (
@@ -81,7 +88,10 @@ export default function ProductDetails() {
             <div className="w-full h-[500px] bg-gray-300 rounded animate-pulse"></div>
             <div className="grid grid-cols-3 gap-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-300 rounded animate-pulse" />
+                <div
+                  key={i}
+                  className="h-32 bg-gray-300 rounded animate-pulse"
+                />
               ))}
             </div>
           </div>
@@ -91,13 +101,19 @@ export default function ProductDetails() {
               <div className="h-6 w-1/3 bg-gray-300 rounded mb-2 animate-pulse" />
               <div className="flex flex-wrap gap-2">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-8 w-16 bg-gray-300 rounded animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-8 w-16 bg-gray-300 rounded animate-pulse"
+                  />
                 ))}
               </div>
             </div>
             <div className="space-y-2">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="h-4 w-1/2 bg-gray-300 rounded animate-pulse" />
+                <div
+                  key={i}
+                  className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"
+                />
               ))}
             </div>
           </div>
@@ -125,7 +141,7 @@ export default function ProductDetails() {
   if (!product) {
     return (
       <div className="min-h-screen p-8 bg-[#CFBDA0] pt-28 flex items-center justify-center">
-        <p className="text-xl">{t('product.notFound')}</p>
+        <p className="text-xl">{t("product.notFound")}</p>
       </div>
     );
   }
@@ -181,17 +197,21 @@ export default function ProductDetails() {
         {/* Product Info Panel */}
         <div className="space-y-6 bg-[#CB7856] p-6 rounded shadow-md">
           <div>
-            <h1 className="text-2xl font-bold text-white mb-3">{product.name}</h1>
+            <h1 className="text-2xl font-bold text-white mb-3">
+              {product.name}
+            </h1>
             {product.description && (
               <div className="text-white text-sm leading-relaxed mb-4">
-                <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                <div
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
               </div>
             )}
           </div>
 
           <div>
             <p className="font-semibold text-lg text-white font-sans mb-0">
-              {t('product.availableSizes')}
+              {t("product.availableSizes")}
             </p>
             <div className="flex flex-wrap gap-2">
               {product.variations?.sizes?.flatMap((group: any) =>
@@ -214,51 +234,49 @@ export default function ProductDetails() {
 
           <div className="text-sm space-y-1 text-white font-sans">
             <p>
-              <strong>{t('product.byM2')}:</strong> € {pricePerM2}
-            </p>
-            <p>
-              <strong>{t('product.byBox')}:</strong> € {pricePerBox}
-            </p>
-            <p className="text-gray-200 italic text-xs">
-              {product?.taxInfo || t('product.taxShipping')}
+              <strong>{t("product.byM2")}:</strong> € {pricePerM2}
             </p>
           </div>
 
           {/* Quantity/Price Section */}
           <div>
             <p className="font-semibold text-lg mb-2 text-white font-inter">
-              {t('product.calculatePrice')}
+              {t("product.calculatePrice")}
             </p>
             <div className="space-y-3 max-w-[100%]">
               {/* Quantity M2 Input */}
               <div className="flex justify-between items-center">
                 <strong className="text-sm text-white">
-                  {t('product.quantityM2')}
+                  {t("product.quantityM2")}
                 </strong>
                 <input
                   type="number"
                   min={0}
                   step="0.01"
                   value={quantityM2}
-                  onChange={(e) => setQuantityM2(parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setQuantityM2(parseFloat(e.target.value) || 0)
+                  }
                   className="max-w-[90px] font-sans text-white bg-[#CB7856] mt-1 px-3 py-1.5 border rounded text-sm"
                 />
               </div>
 
               {/* Calculated M2 from box */}
               <div className="text-sm text-white font-inter flex justify-between">
-                <strong>{t('product.quantityM2Calculated')}:</strong>
+                <strong>{t("product.quantityM2Calculated")}:</strong>
                 <p>{calculatedM2}</p>
               </div>
 
               {/* Box Quantity */}
-              <div className="flex justify-between items-center">
+              {/* <div className="flex justify-between items-center">
                 <strong className="text-white">
-                  {t('product.quantityBox')}
+                  {t("product.quantityBox")}
                 </strong>
                 <div className="flex items-center mt-1">
                   <button
-                    onClick={() => setQuantityBox((prev) => Math.max(prev - 1, 1))}
+                    onClick={() =>
+                      setQuantityBox((prev) => Math.max(prev - 1, 1))
+                    }
                     className="w-8 h-8 text-white border bg-[#CB7856] rounded rounded-r-none"
                   >
                     -
@@ -273,29 +291,29 @@ export default function ProductDetails() {
                     +
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* Prices */}
               <div className="text-white space-y-1">
                 <div className="text-xl font-bold font-inter">
                   € {totalPriceM2}
                   <div className="text-sm font-normal">
-                    {t('product.byM2Total')}
+                    {t("product.byM2Total")}
                   </div>
                 </div>
-                <div className="text-xl font-bold font-inter">
-                  € {totalPriceBox}
-                  <div className="text-sm font-normal">
-                    {t('product.byBox')} total
-                  </div>
-                </div>
+
+                <p className="text-gray-200 italic text-xs">
+                  {product?.taxInfo || t("product.taxShipping")}
+                </p>
               </div>
 
               <p className="text-xs text-white font-inter">
                 {product?.deliveryInfo ? (
-                  <div dangerouslySetInnerHTML={{ __html: product.deliveryInfo }} />
+                  <div
+                    dangerouslySetInnerHTML={{ __html: product.deliveryInfo }}
+                  />
                 ) : (
-                  t('product.deliveryInfo')
+                  t("product.deliveryInfo")
                 )}
               </p>
 
@@ -304,7 +322,7 @@ export default function ProductDetails() {
                   onClick={() => router.push(`/${params.locale}/get-in-touch`)}
                   className="text-sm md:text-[14px] w-full mx-auto hover:bg-white hover:text-black border border-white rounded-lg p-2 font-semibold transition-colors text-white"
                 >
-                  {t('buttons.getQuote')}
+                  {t("buttons.getQuote")}
                 </button>
               </div>
             </div>
@@ -315,7 +333,7 @@ export default function ProductDetails() {
             {product?.footerNote ? (
               <div dangerouslySetInnerHTML={{ __html: product.footerNote }} />
             ) : (
-              t('product.footerNote')
+              t("product.footerNote")
             )}
           </div>
         </div>

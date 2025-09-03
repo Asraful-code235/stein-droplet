@@ -276,9 +276,9 @@ const Products = ({
 
         <div className='flex flex-col lg:flex-row gap-6'>
           <div
-            className={`lg:w-1/4 bg-[#D4C0A8] lg:rounded-xl ${
+            className={`lg:w-1/4 max-sm:bg-[#D4C0A8]  lg:rounded-xl ${
               isMobile
-                ? `fixed top-0 right-0 max-h-[400px] overflow-y-scroll w-[80%] z-50 transition-transform ${
+                ? `fixed top-0 right-0 max-h-[400px] overflow-y-scroll w-[100%] mx-auto z-50 transition-transform ${
                     mobileFiltersOpen ? 'translate-x-0' : 'translate-x-full'
                   }`
                 : 'sticky top-28'
@@ -296,7 +296,7 @@ const Products = ({
               </div>
             )}
 
-            <div className='p-4'>
+            <div className='p-4 bg-[#D4C0A8] min-h-[300px] lg:rounded-xl'>
               {filters.map((filter) => (
                 <div key={filter.name} className='mb-6'>
                   <button

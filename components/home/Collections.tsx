@@ -21,7 +21,7 @@ const Collections = ({ data, collectionCards, locale }: any) => {
   return (
     <div
       id="collections"
-      className="relative bg-[#fff]  bg-opacity-15 h-fit lg:h-screen"
+      className="relative  h-fit lg:h-screen"
       ref={containerRef}
     >
       {/* Background image with parallax */}
