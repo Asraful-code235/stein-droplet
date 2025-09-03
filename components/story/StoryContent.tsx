@@ -49,7 +49,7 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-white via-gray-50 to-white py-20 md:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative bg-gradient-to-b from-white via-gray-50 to-white py-20 md:py-32 md:pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-20 -left-20 w-40 h-40 bg-[#CB7856] opacity-5 rounded-full"></div>

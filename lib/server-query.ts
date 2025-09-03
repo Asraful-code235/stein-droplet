@@ -148,6 +148,8 @@ export async function prefetchOurStoryData(locale: string) {
   await queryClient.prefetchQuery({
     queryKey: ['our-story', locale],
     queryFn: () => getOurStoryData({ locale }),
+    staleTime: 0,
+    gcTime: 0,
   });
 
   return dehydrate(queryClient);
