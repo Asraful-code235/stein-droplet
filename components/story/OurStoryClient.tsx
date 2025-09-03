@@ -18,18 +18,7 @@ interface OurStoryClientProps {
 }
 
 export default function OurStoryClient({ locale, translations }: OurStoryClientProps) {
-  const { data: storyData, isLoading, error } = useOurStoryData(locale);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-lg">{translations.loading}</p>
-        </div>
-      </div>
-    );
-  }
+  const { data: storyData, error } = useOurStoryData(locale);
 
   if (error) {
     return (

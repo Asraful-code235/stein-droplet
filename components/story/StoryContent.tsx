@@ -116,6 +116,8 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
                       className="rounded-2xl shadow-2xl object-cover w-full h-auto transform group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 1024px) 100vw, 400px"
                       placeholder="blur"
+                      loading="lazy"
+                      quality={70}
                       blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNDAwJyBoZWlnaHQ9JzYwMCcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJz48cmVjdCB3aWR0aD0nNDAwJyBoZWlnaHQ9JzYwMCcgZmlsbD0nI2VlZWUnIC8+PC9zdmc+"
                     />
                     {/* Floating decorative elements */}

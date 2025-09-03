@@ -1,21 +1,26 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, HydrationBoundary, DehydratedState } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
 
-export default function QueryProvider({ children }: { children: React.ReactNode }) {
+interface QueryProviderProps {
+  children: React.ReactNode;
+  dehydratedState?: DehydratedState;
+}
+
+export default function QueryProvider({ children, dehydratedState }: QueryProviderProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            // Keep data fresh but reduce unnecessary refetches
-            staleTime: 30 * 1000, // 30 seconds - data is fresh for 30s
-            gcTime: 5 * 60 * 1000, // 5 minutes - keep in cache for 5 minutes
-            refetchOnWindowFocus: true, // Still refetch when window gains focus
-            refetchOnMount: false, // Don't refetch on every mount if data is fresh
-            refetchOnReconnect: true, // Refetch when network reconnects
+            // Optimized for server-side hydration
+            staleTime: 60 * 1000, // 1 minute - data is fresh for 1 minute
+            gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache for 10 minutes
+            refetchOnWindowFocus: false, // Don't refetch on window focus (data is prefetched)
+            refetchOnMount: false, // Don't refetch on mount (data is hydrated)
+            refetchOnReconnect: true, // Still refetch when network reconnects
             retry: 1,
           },
         },
@@ -24,7 +29,9 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <HydrationBoundary state={dehydratedState}>
+        {children}
+      </HydrationBoundary>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

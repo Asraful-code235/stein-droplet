@@ -33,8 +33,9 @@ const Collections = ({ data, collectionCards, locale }: any) => {
               alt="Background"
               fill
               className="brightness-50 object-cover"
+              sizes="100vw"
               priority
-              quality={100}
+              quality={75}
             />
           ) : null}
         </div>

@@ -41,8 +41,9 @@ const GallerySection = ({
                 alt="Background"
                 fill
                 className="brightness-50 object-cover"
+                sizes="100vw"
                 priority
-                quality={100}
+                quality={75}
               />
             ) : (
               <div className="w-full h-full bg-gray-800"></div>
@@ -88,7 +89,8 @@ const GallerySection = ({
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                             className="object-cover transition-transform duration-700 group-hover:scale-110"
-                            quality={90}
+                            loading="lazy"
+                            quality={75}
                           />
                         )}
                       </div>

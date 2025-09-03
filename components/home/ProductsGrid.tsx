@@ -30,8 +30,9 @@ const ProductsGrid = ({ data }: any) => {
             alt="Background Image"
             fill
             className="object-cover z-0"
-            priority
-            sizes="(min-width: 1280px) 1280px, 100vw"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            loading="lazy"
+            quality={75}
           />
         ) : (
           <div className="w-full h-full bg-gray-300 flex items-center justify-center">

@@ -78,10 +78,10 @@ const CollectionGrid = ({ collections, locale }: any) => {
         <Image
           src={backgroundImage}
           alt={alt || "background"}
-          sizes="100vw"
+          sizes="(max-width: 640px) 288px, (max-width: 1024px) 50vw, 33vw"
           fill
           className="z-0 object-cover"
-          priority
+          loading="lazy"
         />
       )}
 

@@ -2,6 +2,23 @@ function getAssetUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_BACKEND_URL?.replace("/api", "")}${path}`;
 }
 
+// Prefer a smaller Strapi image format (default: medium), falling back to small/thumbnail/original
+function getPreferredFormatUrl(image: any, preferred: string = 'medium'): string | null {
+  if (!image) return null;
+  const node = image?.attributes ?? image?.data?.attributes ?? image;
+  const formats = node?.formats;
+  const pick = (fmtKey: string) => (formats && formats[fmtKey] && formats[fmtKey].url) ? getAssetUrl(formats[fmtKey].url) : null;
+  // Preference order: preferred -> small -> thumbnail -> original
+  const preferredUrl = pick(preferred);
+  if (preferredUrl) return preferredUrl;
+  const smallUrl = pick('small');
+  if (smallUrl) return smallUrl;
+  const thumbUrl = pick('thumbnail');
+  if (thumbUrl) return thumbUrl;
+  return node?.url ? getAssetUrl(node.url) : null;
+}
+
+
 function getAuthHeaders(): Record<string, string> {
   const token = process.env.STRAPI_API_TOKEN || process.env.NEXT_PUBLIC_STRAPI_API_TOKEN;
   if (token) {
@@ -134,9 +151,7 @@ export async function getAllCategories(locale: any) {
     (sec: any) => sec.__component === "common.premium-products"
   );
   const details = {
-    premiumBackgroundImage: premiumSection?.backgroundImage?.url
-      ? `${assetURL}${premiumSection.backgroundImage.url}`
-      : null,
+    premiumBackgroundImage: getPreferredFormatUrl(premiumSection?.backgroundImage, 'medium'),
     premiumDetails: {
       title: premiumSection?.commonSection?.title ?? "No title",
       subTitle: premiumSection?.commonSection?.subTitle ?? "No subtitle",
@@ -156,9 +171,7 @@ export async function getAllCategories(locale: any) {
       createdAt: category.createdAt,
       updatedAt: category.updatedAt,
       publishedAt: category.publishedAt,
-      backgroundImage: category?.backgroundImage?.url
-        ? `${assetURL}${category.backgroundImage.url}`
-        : null,
+      backgroundImage: getPreferredFormatUrl(category?.backgroundImage, 'medium'),
       backgroundImageAlt: category?.backgroundImage?.alternativeText || "",
       backgroundImageName: category?.backgroundImage?.name || "",
     };
@@ -227,7 +240,10 @@ export async function projectShowcaseData(locale: any) {
     let backgroundImage: string | null = null;
     const mainImage = heading?.mainImage ?? node?.mainImage;
     if (mainImage) {
-      if (typeof mainImage.url === "string") {
+      const preferred = getPreferredFormatUrl(mainImage, 'medium');
+      if (preferred) {
+        backgroundImage = preferred;
+      } else if (typeof mainImage.url === "string") {
         backgroundImage = assetURL + mainImage.url;
       } else if (mainImage.data) {
         const u = mainImage.data?.attributes?.url || mainImage.data?.url;
@@ -248,7 +264,10 @@ export async function projectShowcaseData(locale: any) {
   let showcaseBackgroundImage: string | null = null;
   const bgImage = showcaseSection?.backgroundImage;
   if (bgImage) {
-    if (typeof bgImage.url === "string") {
+    const preferred = getPreferredFormatUrl(bgImage, 'medium');
+    if (preferred) {
+      showcaseBackgroundImage = preferred;
+    } else if (typeof bgImage.url === "string") {
       showcaseBackgroundImage = assetURL + bgImage.url;
     } else if (bgImage.data) {
       const u = bgImage.data?.attributes?.url || bgImage.data?.url;
@@ -321,15 +340,16 @@ export async function getProductsByCategorySlug({ categorySlug, locale }: any) {
       const mainImage = product.mainImage;
       const gallery = product.gallery || [];
 
+      const imageUrl = getPreferredFormatUrl(mainImage, 'medium');
       return {
         id: product.id,
         name: product.name,
         slug: product.slug,
         price: product.price,
         description: product.description,
-        image: mainImage?.url ? `${assetURL}${mainImage.url}` : null,
+        image: imageUrl,
         gallery: gallery.map((img: any) => ({
-          url: img.url ? `${assetURL}${img.url}` : null,
+          url: getPreferredFormatUrl(img, 'medium'),
           alternativeText: img.alternativeText || '',
           width: img.width,
           height: img.height,
@@ -390,15 +410,16 @@ export async function getAllProducts({ locale }: { locale: string }) {
       const mainImage = product.mainImage;
       const gallery = product.gallery || [];
 
+      const imageUrl = getPreferredFormatUrl(mainImage, 'medium');
       return {
         id: product.id,
         name: product.name,
         slug: product.slug,
         price: product.price,
         description: product.description,
-        image: mainImage?.url ? `${assetURL}${mainImage.url}` : null,
+        image: imageUrl,
         gallery: gallery.map((img: any) => ({
-          url: img.url ? `${assetURL}${img.url}` : null,
+          url: getPreferredFormatUrl(img, 'medium'),
           alternativeText: img.alternativeText || '',
           width: img.width,
           height: img.height,
@@ -828,7 +849,10 @@ export async function getAllProjects({ locale }: { locale: string }) {
     let mainImageUrl: string | null = null;
     const mainImage = heading?.mainImage ?? node?.mainImage;
     if (mainImage) {
-      if (typeof mainImage.url === "string") {
+      const preferred = getPreferredFormatUrl(mainImage, 'medium');
+      if (preferred) {
+        mainImageUrl = preferred;
+      } else if (typeof mainImage.url === "string") {
         mainImageUrl = assetURL + mainImage.url;
       } else if (mainImage.data) {
         const u = mainImage.data?.attributes?.url || mainImage.data?.url;
@@ -847,9 +871,10 @@ export async function getAllProjects({ locale }: { locale: string }) {
 
     const gallery = galleryArray.map((img: any) => {
       const imgNode = img.attributes ?? img;
+      const url = getPreferredFormatUrl(imgNode, 'medium') || (imgNode.url ? `${assetURL}${imgNode.url}` : null);
       return {
         id: img.id,
-        url: imgNode.url ? `${assetURL}${imgNode.url}` : null,
+        url,
         alternativeText: imgNode.alternativeText || "",
         name: imgNode.name || "",
       };
@@ -860,7 +885,10 @@ export async function getAllProjects({ locale }: { locale: string }) {
     const backgroundImage = node.backgroundImage;
 
     if (backgroundImage) {
-      if (typeof backgroundImage.url === "string") {
+      const preferred = getPreferredFormatUrl(backgroundImage, 'medium');
+      if (preferred) {
+        backgroundImageUrl = preferred;
+      } else if (typeof backgroundImage.url === "string") {
         backgroundImageUrl = assetURL + backgroundImage.url;
       } else if (backgroundImage.data) {
         const u = backgroundImage.data?.attributes?.url || backgroundImage.data?.url;
@@ -1107,7 +1135,7 @@ export async function getCollectionData({ locale }: any) {
 
   const assetURL = apiURL.replace(/\/api\/?$/, "");
 
-  const assetUrl = `${assetURL}${url}`;
+  const assetUrl = getPreferredFormatUrl({ url, formats }, 'medium') || `${assetURL}${url}`;
 
   return {
     sectionId,
@@ -1161,7 +1189,7 @@ export async function getAllCatalogues(locale: string) {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         publishedAt: item.publishedAt,
-        backgroundImage: image?.url ? `${assetURL}${image.url}` : null,
+        backgroundImage: getPreferredFormatUrl(image, 'medium'),
         backgroundImageAlt: image?.alternativeText || "",
         backgroundImageName: image?.name || "",
         // Include catalogue items for future use

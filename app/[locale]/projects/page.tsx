@@ -8,6 +8,8 @@ import {
 } from "@/lib/api";
 import { getTranslation } from "@/lib/i18n-server";
 import Image from "next/image";
+import { prefetchProjectsData } from "@/lib/server-query";
+import HydratedPage from "@/components/HydratedPage";
 
 export async function generateMetadata({
   params,
@@ -35,6 +37,9 @@ export default async function GalleryPage({
   searchParams?: { category?: string };
 }) {
   const category = searchParams?.category;
+
+  // Prefetch projects data server-side
+  const dehydratedState = await prefetchProjectsData(params.locale, category);
 
   if (category) {
     const [project, categories, allProjects] = await Promise.all([
@@ -70,31 +75,35 @@ export default async function GalleryPage({
 
 
     return (
-      <div className="min-h-screen relative">
-        {/* Background Image */}
-        {backgroundImage ? (
-          <div className="absolute inset-0 -z-20">
-            <Image
-              src={backgroundImage}
-              alt="Project Background"
-              fill
-              className="object-cover"
-              priority
-            />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-          </div>
-        ) : (
-          <div className="absolute inset-0 z-0 bg-[#D4C0A8]"></div>
-        )}
+      <HydratedPage dehydratedState={dehydratedState}>
+        <div className="min-h-screen relative">
+          {/* Background Image */}
+          {backgroundImage ? (
+            <div className="absolute inset-0 -z-20">
+              <Image
+                src={backgroundImage}
+                alt="Project Background"
+                fill
+                className="object-cover"
+                sizes="100vw"
+                priority
+                quality={70}
+              />
+              {/* Dark overlay for better text readability */}
+              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+            </div>
+          ) : (
+            <div className="absolute inset-0 z-0 bg-[#D4C0A8]"></div>
+          )}
 
-        {/* Content */}
-        <div className="relative z-20">
-          <div className="py-8 flex justify-center items-center min-h-screen">
-            <ProjectGallery gallery={gallery} />
+          {/* Content */}
+          <div className="relative z-20">
+            <div className="py-8 flex justify-center items-center min-h-screen">
+              <ProjectGallery gallery={gallery} />
+            </div>
           </div>
         </div>
-      </div>
+      </HydratedPage>
     );
   }
 
@@ -113,35 +122,39 @@ export default async function GalleryPage({
   };
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      {firstShowcaseImage ? (
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={firstShowcaseImage}
-            alt="Projects Background"
-            fill
-            className="object-cover"
-            priority
-          />
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        </div>
-      ) : (
-        <div className="absolute inset-0 z-0 bg-[#D4C0A8]"></div>
-      )}
-
-      {/* Content */}
-      <div className="relative z-20">
-        {first && <GalleryBanner data={first} />}
-        <div className="py-8 flex justify-center items-center">
-          {projects && (
-            <ProjectGallery
-              projects={projects as any}
+    <HydratedPage dehydratedState={dehydratedState}>
+      <div className="min-h-screen relative">
+        {/* Background Image */}
+        {firstShowcaseImage ? (
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={firstShowcaseImage}
+              alt="Projects Background"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+              quality={70}
             />
-          )}
+            {/* Dark overlay for better text readability */}
+            <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          </div>
+        ) : (
+          <div className="absolute inset-0 z-0 bg-[#D4C0A8]"></div>
+        )}
+
+        {/* Content */}
+        <div className="relative z-20">
+          {first && <GalleryBanner data={first} />}
+          <div className="py-8 flex justify-center items-center">
+            {projects && (
+              <ProjectGallery
+                projects={projects as any}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </HydratedPage>
   );
 }

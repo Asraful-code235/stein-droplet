@@ -29,28 +29,16 @@ interface HomePageClientProps {
 }
 
 export default function HomePageClient({ locale, translations }: HomePageClientProps) {
-  // Use TanStack Query hooks for real-time data
-  const { data: heroData, isLoading: heroLoading, error: heroError } = useHeroData(locale);
-  const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = useCategories(locale);
-  const { data: discoveryData, isLoading: discoveryLoading, error: discoveryError } = useDiscoveryData(locale);
-  const { data: projectShowcase, isLoading: showcaseLoading, error: showcaseError } = useProjectShowcase(locale);
-  const { data: catalogueCards, isLoading: catalogueLoading, error: catalogueError } = useCatalogues(locale);
-  const { data: projects, isLoading: projectsLoading, error: projectsError } = useProjects(locale);
-  const { data: collectionData, isLoading: collectionLoading, error: collectionError } = useCollectionData(locale);
+  // Use TanStack Query hooks - data should be available immediately from server prefetch
+  const { data: heroData, error: heroError } = useHeroData(locale);
+  const { data: categoriesData, error: categoriesError } = useCategories(locale);
+  const { data: discoveryData, error: discoveryError } = useDiscoveryData(locale);
+  const { data: projectShowcase, error: showcaseError } = useProjectShowcase(locale);
+  const { data: catalogueCards, error: catalogueError } = useCatalogues(locale);
+  const { data: projects, error: projectsError } = useProjects(locale);
+  const { data: collectionData, error: collectionError } = useCollectionData(locale);
 
-  // Show loading state
-  if (heroLoading || categoriesLoading || discoveryLoading || showcaseLoading || catalogueLoading || projectsLoading || collectionLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-lg">{translations.loading}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
+  // Show error state (no loading state needed since data is prefetched)
   if (heroError || categoriesError || discoveryError || showcaseError || catalogueError || projectsError || collectionError) {
     return (
       <div className="min-h-screen flex items-center justify-center">

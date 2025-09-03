@@ -376,7 +376,8 @@ const Products = ({
                           fill
                           className='object-cover'
                           sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
-                          priority
+                          loading='lazy'
+                          quality={75}
                         />
                       ) : (
                         <div className='w-full h-full flex items-center justify-center bg-gray-100'>

@@ -15,6 +15,8 @@ const Banner = ({ data ,locale }: any) => {
           loop
           muted
           playsInline
+          preload="metadata"
+          poster="/video-poster.jpg"
         />
       </div>
 
