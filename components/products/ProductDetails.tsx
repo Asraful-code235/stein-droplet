@@ -250,13 +250,15 @@ export default function ProductDetails() {
                   {t("product.quantityM2")}
                 </strong>
                 <input
-                  type="number"
-                  min={0}
-                  step="0.01"
+                  type="text"
                   value={quantityM2}
-                  onChange={(e) =>
-                    setQuantityM2(parseFloat(e.target.value) || 0)
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow only numbers and decimal points
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      setQuantityM2(value === '' ? 0 : parseFloat(value) || 0);
+                    }
+                  }}
                   className="max-w-[90px] font-sans text-white bg-[#CB7856] mt-1 px-3 py-1.5 border rounded text-sm"
                 />
               </div>
@@ -264,7 +266,7 @@ export default function ProductDetails() {
               {/* Calculated M2 from box */}
               <div className="text-sm text-white font-inter flex justify-between">
                 <strong>{t("product.quantityM2Calculated")}:</strong>
-                <p>{calculatedM2}</p>
+                <p>{quantityM2.toFixed(2)}</p>
               </div>
 
               {/* Box Quantity */}
