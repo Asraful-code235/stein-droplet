@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { useTranslation } from "@/lib/i18n";
+// No translation fallback needed here; rely solely on backend data
 
 interface StoryContentProps {
   data?: {
@@ -17,31 +17,8 @@ interface StoryContentProps {
 
 const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
 
-  const { t } = useTranslation();
-
-  // Fallback content for when backend is not ready
-  const fallbackData = {
-    title: t('story.ourJourney'),
-    richContent: `
-      <p>Founded in 2001, our company began as a small family business with a simple vision: to bring the world's most beautiful natural materials to discerning architects, designers, and homeowners.</p>
-      
-      <h3>The Beginning</h3>
-      <p>What started in a modest warehouse has grown into one of Europe's most trusted suppliers of premium building materials. Our founder, driven by a passion for natural beauty and craftsmanship, traveled the globe to source the finest stones and ceramics.</p>
-      
-      <blockquote>"Every stone tells a story, every ceramic holds a dream. We are simply the storytellers who bring these dreams to life."</blockquote>
-      
-      <h3>Our Philosophy</h3>
-      <p>We believe that the materials we choose for our spaces should inspire us daily. Whether it's the warm embrace of natural travertine, the sleek sophistication of premium ceramics, or the timeless appeal of handcrafted bricks, each material we offer is selected for its ability to transform spaces and elevate experiences.</p>
-      
-      <h3>Sustainability & Craftsmanship</h3>
-      <p>Our commitment extends beyond beauty to sustainability and ethical sourcing. We work directly with quarries and manufacturers who share our values of environmental responsibility and fair labor practices.</p>
-    `,
-    sideImage: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
-    sideImageAlt: "Craftsman working with natural stone",
-    layout: 'text-left'
-  };
-
-  const contentData = data || fallbackData;
+  // No fallback: if no backend data, render nothing
+  if (!data) return null;
 
   // Function to render rich content safely
   const renderRichContent = (content: string) => {
@@ -63,7 +40,7 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
         <div className="text-center mb-20">
           <div className="inline-block relative">
             <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold font-playfair text-[#101820] mb-6 relative">
-              {contentData.title}
+              {data.title}
               {/* Creative underline */}
               <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-[#CB7856] to-transparent"></div>
               <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 w-16 h-px bg-[#CB7856] opacity-60"></div>
@@ -79,14 +56,16 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
               {/* Quote mark decoration */}
               <div className="absolute -top-6 -left-6 text-8xl text-[#CB7856] opacity-20 font-serif leading-none">"</div>
 
-              <div
-                className="prose prose-xl max-w-none text-[#101820] leading-relaxed relative z-10"
-                dangerouslySetInnerHTML={renderRichContent(contentData.richContent || "")}
-                style={{
-                  fontSize: '1.2rem',
-                  lineHeight: '1.9'
-                }}
-              />
+              {data.richContent && (
+                <div
+                  className="prose prose-xl max-w-none text-[#101820] leading-relaxed relative z-10"
+                  dangerouslySetInnerHTML={renderRichContent(data.richContent)}
+                  style={{
+                    fontSize: '1.2rem',
+                    lineHeight: '1.9'
+                  }}
+                />
+              )}
 
               <div className="mt-8 flex items-center">
                 <div className="w-12 h-px bg-[#CB7856]"></div>
@@ -100,17 +79,17 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
           <div className="lg:col-span-4 order-1 lg:order-2">
             <div className="relative">
               {(() => {
-                const imageUrl = typeof contentData.sideImage === 'object' && contentData.sideImage?.url
-                  ? contentData.sideImage.url
-                  : typeof contentData.sideImage === 'string'
-                  ? contentData.sideImage
+                const imageUrl = typeof data.sideImage === 'object' && data.sideImage?.url
+                  ? data.sideImage.url
+                  : typeof (data as any).sideImage === 'string'
+                  ? (data as any).sideImage as string
                   : null;
 
                 return imageUrl ? (
                   <div className="relative group">
                     <Image
                       src={imageUrl.startsWith('http') ? imageUrl : `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`}
-                      alt={contentData.sideImageAlt || "Our story"}
+                      alt={data.sideImageAlt || "Our story"}
                       width={400}
                       height={600}
                       className="rounded-2xl shadow-2xl object-cover w-full h-auto transform group-hover:scale-105 transition-transform duration-500"
@@ -124,30 +103,8 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
                     <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#CB7856] rounded-full opacity-80"></div>
                     <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-slate-300 rounded-full opacity-60"></div>
                   </div>
-                ) : (
-                <div className="relative">
-                  {/* Creative placeholder with geometric design */}
-                  <div className="w-full h-[600px] bg-gradient-to-br from-slate-100 via-white to-slate-200 rounded-2xl shadow-2xl flex items-center justify-center relative overflow-hidden">
-                    {/* Geometric pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                      <div className="absolute top-10 left-10 w-20 h-20 border-2 border-[#CB7856] rounded-lg rotate-12"></div>
-                      <div className="absolute bottom-20 right-10 w-16 h-16 bg-[#CB7856] rounded-full"></div>
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-slate-300 rounded-full"></div>
-                    </div>
-                    <div className="text-center z-10">
-                      <div className="w-16 h-16 bg-[#CB7856] rounded-full mx-auto mb-4 flex items-center justify-center">
-                        <div className="w-8 h-8 border-2 border-white rounded-full"></div>
-                      </div>
-                      <span className="text-slate-500 text-lg font-light">Visual Story</span>
-                      <p className="text-slate-400 text-sm mt-2">Coming Soon</p>
-                    </div>
-                  </div>
-                  {/* Floating decorative elements */}
-                  <div className="absolute -top-4 -right-4 w-8 h-8 bg-[#CB7856] rounded-full opacity-80 animate-pulse"></div>
-                  <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-slate-300 rounded-full opacity-60 animate-pulse delay-500"></div>
-                </div>
-              );
-            })()}
+                ) : null;
+              })()}
             </div>
           </div>
         </div>

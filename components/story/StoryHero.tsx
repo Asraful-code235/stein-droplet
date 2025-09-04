@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { useTranslation } from "@/lib/i18n";
 
 interface StoryHeroProps {
   data?: {
@@ -17,35 +16,24 @@ interface StoryHeroProps {
 
 const StoryHero: React.FC<StoryHeroProps> = ({ data }) => {
 
-  const { t } = useTranslation();
-
-  // Fallback data for when backend is not ready
-  const fallbackData = {
-    title: t("story.craftingSpacesWith"),
-    subTitle: t("story.premiumMaterials"),
-    description: t("story.heroDescription"),
-    backgroundImage:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-    backgroundImageAlt: "Premium materials showcase",
-  };
-
-  const heroData = data || fallbackData;
+  // No fallback content/images: if no backend data provided, render nothing
+  if (!data) return null;
 
   return (
     <section className="relative w-full min-h-screen max-w-none overflow-hidden">
       {/* Animated Background Pattern */}
       <div className="absolute inset-0 -z-10">
         {(() => {
-          const imageUrl = typeof heroData.backgroundImage === 'object' && heroData.backgroundImage?.url
-            ? heroData.backgroundImage.url
-            : typeof heroData.backgroundImage === 'string'
-            ? heroData.backgroundImage
+          const imageUrl = typeof data.backgroundImage === 'object' && data.backgroundImage?.url
+            ? data.backgroundImage.url
+            : typeof (data as any).backgroundImage === 'string'
+            ? (data as any).backgroundImage as string
             : null;
 
           return imageUrl ? (
             <Image
               src={imageUrl.startsWith('http') ? imageUrl : `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`}
-              alt={heroData.backgroundImageAlt || "Our Story"}
+              alt={data.backgroundImageAlt || "Our Story"}
               fill
               className="object-cover brightness-30"
               priority
@@ -53,15 +41,7 @@ const StoryHero: React.FC<StoryHeroProps> = ({ data }) => {
               sizes="100vw"
               quality={70}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
-              {/* Animated geometric shapes */}
-              <div className="absolute top-20 left-10 w-32 h-32 bg-[#CB7856] opacity-10 rounded-full animate-pulse"></div>
-              <div className="absolute top-40 right-20 w-24 h-24 bg-white opacity-5 rounded-lg rotate-45 animate-bounce"></div>
-              <div className="absolute bottom-32 left-1/4 w-16 h-16 bg-[#CB7856] opacity-15 rounded-full animate-pulse delay-1000"></div>
-              <div className="absolute bottom-20 right-1/3 w-20 h-20 bg-white opacity-5 rounded-lg rotate-12 animate-bounce delay-500"></div>
-            </div>
-          );
+          ) : null;
         })()}
       </div>
 
@@ -83,11 +63,11 @@ const StoryHero: React.FC<StoryHeroProps> = ({ data }) => {
           <div className="mb-8">
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-playfair leading-tight">
               <span className="inline-block animate-fade-in-up">
-                {heroData.title}
+                {data.title}
               </span>
               <br />
               <span className="text-[#CB7856] font-inter inline-block animate-fade-in-up animation-delay-300 relative">
-                {heroData.subTitle}
+                {data.subTitle}
                 {/* Underline decoration */}
                 <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#CB7856] to-transparent animate-expand-width"></div>
               </span>
@@ -97,7 +77,7 @@ const StoryHero: React.FC<StoryHeroProps> = ({ data }) => {
           {/* Description with typewriter effect styling */}
           <div className="animate-fade-in-up animation-delay-600">
             <p className="text-xl md:text-2xl lg:text-3xl font-light leading-relaxed max-w-4xl mx-auto text-gray-100">
-              {heroData.description}
+              {data.description}
             </p>
           </div>
 

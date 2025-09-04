@@ -40,29 +40,32 @@ const CompanyShowcase: React.FC<CompanyShowcaseProps> = ({ data }) => {
     return null;
   }
 
-  const { title, description, images, teamSection } = data;
+  const { teamSection } = data;
 
   // Helper function to get the best image URL
   const getImageUrl = (
     imageObj: any,
-    baseUrl = "https://backend.steinmarine.de"
+    baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || ""
   ) => {
     if (!imageObj) return "";
 
     // Try to get the best quality image available
-    if (imageObj.formats?.large?.url) {
-      return `${baseUrl}${imageObj.formats.large.url}`;
+    const pickUrl = (
+      imageObj.formats?.large?.url ||
+      imageObj.formats?.medium?.url ||
+      imageObj.formats?.small?.url ||
+      imageObj.url
+    );
+
+    if (!pickUrl) return "";
+
+    // If already absolute, return as-is
+    if (typeof pickUrl === 'string' && /^(https?:)?\/\//.test(pickUrl)) {
+      return pickUrl;
     }
-    if (imageObj.formats?.medium?.url) {
-      return `${baseUrl}${imageObj.formats.medium.url}`;
-    }
-    if (imageObj.formats?.small?.url) {
-      return `${baseUrl}${imageObj.formats.small.url}`;
-    }
-    if (imageObj.url) {
-      return `${baseUrl}${imageObj.url}`;
-    }
-    return "";
+
+    // Otherwise prefix with backend base URL
+    return `${baseUrl}${pickUrl}`;
   };
 
   return (
