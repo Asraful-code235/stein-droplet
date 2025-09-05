@@ -1503,19 +1503,34 @@ export async function getOurStoryData({ locale }: any) {
     populate: "deep",
   });
 
-  try {
+  const fullUrl = addCacheBuster(`${apiURL}/api/our-story?${params.toString()}&populate=deep`);
 
-    const res = await fetch(
-      `${apiURL}/api/our-story?${params.toString()}&populate=deep`,
-      {
-        headers: {
-          ...getAuthHeaders(),
-        },
-      }
-    );
+  console.log("Our Story API Request:", {
+    url: fullUrl,
+    locale,
+    headers: getAuthHeaders()
+  });
+
+  try {
+    const res = await fetch(fullUrl, {
+      ...getNoCacheOptions(),
+      headers: {
+        ...getAuthHeaders(),
+      },
+    });
+
+    console.log("Our Story API Response Status:", res.status, res.statusText);
 
     if (!res.ok) {
-      console.error(`Failed to fetch our-story data: ${res.status} ${res.statusText}`);
+      const errorText = await res.text();
+      console.error(`Failed to fetch our-story data: ${res.status} ${res.statusText}`, errorText);
+
+      // Try alternative populate strategies
+      if (res.status === 500) {
+        console.log("Trying alternative populate strategy...");
+        return await tryAlternativeOurStoryFetch(apiURL, locale);
+      }
+
       return null;
     }
 
@@ -1525,6 +1540,42 @@ export async function getOurStoryData({ locale }: any) {
     return data?.data;
   } catch (error) {
     console.error("Error fetching our story data:", error);
-    return null;
+
+    // Try alternative approach on error
+    console.log("Trying alternative populate strategy due to error...");
+    return await tryAlternativeOurStoryFetch(apiURL, locale);
   }
+}
+
+// Alternative fetch strategy for our-story
+async function tryAlternativeOurStoryFetch(apiURL: string, locale: string) {
+  const alternatives = [
+    `${apiURL}/api/our-story?locale=${locale}&populate=*`,
+    `${apiURL}/api/our-story?locale=${locale}&populate[hero]=*&populate[content]=*&populate[showcase]=*`,
+    `${apiURL}/api/our-story?locale=${locale}`,
+  ];
+
+  for (const url of alternatives) {
+    try {
+      console.log("Trying alternative URL:", url);
+      const res = await fetch(addCacheBuster(url), {
+        ...getNoCacheOptions(),
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Alternative fetch successful:", JSON.stringify(data, null, 2));
+        return data?.data;
+      } else {
+        console.log("Alternative failed:", res.status, res.statusText);
+      }
+    } catch (error) {
+      console.log("Alternative error:", error);
+    }
+  }
+
+  return null;
 }

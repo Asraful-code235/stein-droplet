@@ -82,7 +82,7 @@ const CompanyShowcase: React.FC<CompanyShowcaseProps> = ({ data }) => {
               {/* Team Image */}
               {teamSection.teamImage && (
                 <div className="relative group">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-2xl">
+                  <div className="relative aspect-[4/3] overflow-hidden ">
                     <Image
                       src={getImageUrl(teamSection.teamImage)}
                       alt={teamSection.teamImageAlt || "Our team"}
@@ -97,7 +97,7 @@ const CompanyShowcase: React.FC<CompanyShowcaseProps> = ({ data }) => {
               )}
 
               {/* Team Description */}
-              <div className="space-y-8">
+              <div className="space-y-8 max-lg:px-4">
                 {teamSection.description && (
                   <div className="relative">
                     <p className="text-xl md:text-2xl text-gray-300 font-light leading-relaxed  text-left">

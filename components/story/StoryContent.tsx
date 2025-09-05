@@ -92,7 +92,7 @@ const StoryContent: React.FC<StoryContentProps> = ({ data }) => {
                       alt={data.sideImageAlt || "Our story"}
                       width={400}
                       height={600}
-                      className="rounded-2xl shadow-2xl object-cover w-full h-auto transform group-hover:scale-105 transition-transform duration-500"
+                      className=" object-cover w-full h-auto transform group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 1024px) 100vw, 400px"
                       placeholder="blur"
                       loading="lazy"

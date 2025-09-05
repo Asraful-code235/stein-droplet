@@ -66,7 +66,6 @@ export default function HomePageClient({ locale, translations }: HomePageClientP
 
   const { categories, details } = categoriesData || { categories: [], details: null };
 
-  console.log("🔄 Real-time projectShowcase data:", projectShowcase);
 
   return (
     <ParallaxWrapper>
