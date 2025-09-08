@@ -1015,8 +1015,12 @@ export async function getCatalogueBySlug({ locale, category }: any) {
 
   try {
     // Fetch catalogues by slug directly (new structure doesn't need category lookup)
-    const url = `${apiURL}/catalogues?locale=${locale}&filters[catalogueSlug][$eq]=${category}&populate=*`;
-    const res = await fetch(url);
+    const url = addCacheBuster(`${apiURL}/catalogues?locale=${locale}&filters[catalogueSlug][$eq]=${category}&populate=*`);
+    const res = await fetch(url, {
+      ...getNoCacheOptions({
+        ...getAuthHeaders(),
+      }),
+    });
 
     if (!res.ok) {
       console.warn(`Failed to fetch catalogue: ${res.statusText}`);
@@ -1169,7 +1173,14 @@ export async function getAllCatalogues(locale: string) {
 
   try {
     // Fetch catalogues with new structure
-    const cataloguesRes = await fetch(`${apiURL}/catalogues?locale=${locale}&populate=*`);
+    const cataloguesRes = await fetch(
+      addCacheBuster(`${apiURL}/catalogues?locale=${locale}&populate=*`),
+      {
+        ...getNoCacheOptions({
+          ...getAuthHeaders(),
+        }),
+      }
+    );
 
     if (!cataloguesRes.ok) {
       console.warn(`Failed to fetch catalogues: ${cataloguesRes.statusText}`);

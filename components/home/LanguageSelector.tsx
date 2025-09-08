@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { IoIosArrowDown } from "react-icons/io";
 import earth from "@/assets/Earth.png";
 const Image: any = require("next/image").default;
@@ -15,6 +15,7 @@ export default function LanguageSelector() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const langCodes = languages.map((l) => l.code);
   const ArrowIcon: any = IoIosArrowDown;
 
@@ -34,7 +35,11 @@ export default function LanguageSelector() {
         ? `/${newLangCode}/${filteredSegments.join("/")}`
         : `/${newLangCode}`;
 
-    router.push(newPath);
+    const queryString = searchParams?.toString() ?? "";
+    const hash = typeof window !== "undefined" ? window.location.hash : "";
+    const href = queryString ? `${newPath}?${queryString}${hash}` : `${newPath}${hash}`;
+
+    router.push(href);
     setOpen(false);
   };
 

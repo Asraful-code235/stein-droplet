@@ -32,8 +32,8 @@ export const useCategories = (locale: string) => {
   return useQuery({
     queryKey: ['categories', locale],
     queryFn: () => getAllCategories(locale),
-    staleTime: 5 * 60 * 1000, // 5 minutes - categories don't change often
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute - products change more often
+    gcTime: 3 * 60 * 1000, // 3 minutes
   });
 };
 
@@ -51,8 +51,8 @@ export const useProductById = (locale: string, id: string) => {
   return useQuery({
     queryKey: ['product', locale, id],
     queryFn: () => getProductById({ locale, id }),
-    staleTime: 2 * 60 * 1000, // 2 minutes - individual products
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute - products change more often
+    gcTime: 3 * 60 * 1000, // 3 minutes
     enabled: !!id,
   });
 };
@@ -61,8 +61,8 @@ export const useProductBySlug = (locale: string, slug: string) => {
   return useQuery({
     queryKey: ['product', locale, 'slug', slug],
     queryFn: () => getProductBySlug({ locale, slug }),
-    staleTime: 2 * 60 * 1000,
-    gcTime: 5 * 60 * 1000,
+    staleTime: 1 * 60 * 1000,
+    gcTime: 2 * 60 * 1000,
     enabled: !!slug,
   });
 };
@@ -129,8 +129,8 @@ export const useCatalogues = (locale: string) => {
   return useQuery({
     queryKey: ['catalogues', locale],
     queryFn: () => getAllCatalogues(locale),
-    staleTime: 0,
-    gcTime: 0,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 };
 
@@ -140,7 +140,8 @@ export const useCatalogueByCategory = (locale: string, category: string) => {
     queryFn: () => getCatalogueBySlug({ locale, category }),
     staleTime: 0,
     gcTime: 0,
-    enabled: !!category,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -239,10 +240,12 @@ export const useThickness = (locale: string) => {
 
 export const useCollectionData = (locale: string) => {
   return useQuery({
-    queryKey: ['collection', locale],
+    queryKey: ['collection','realtime', locale],
     queryFn: () => getCollectionData({ locale }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 
@@ -289,13 +292,23 @@ export const useManualRefresh = () => {
   };
 
   const refreshAll = (locale: string) => {
-    queryClient.invalidateQueries({ queryKey: [locale] }); // Invalidate all queries for this locale
+    queryClient.invalidateQueries({ queryKey: [locale] });
+  };
+
+  const refreshCatalogues = (locale: string) => {
+    queryClient.invalidateQueries({ queryKey: ['catalogues', locale] });
+  };
+
+  const refreshCatalogueCategory = (locale: string, category: string) => {
+    queryClient.invalidateQueries({ queryKey: ['catalogue', 'category', locale, category] });
   };
 
   return {
     refreshProducts,
     refreshCategories,
     refreshProjects,
+    refreshCatalogues,
+    refreshCatalogueCategory,
     refreshAll,
   };
 };

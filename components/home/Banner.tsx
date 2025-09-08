@@ -38,7 +38,7 @@ const Banner = ({ data ,locale }: any) => {
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto justify-center">
-            <Link href={`${locale}/#collections`} className="bg-[#CB7856] text-white font-semibold px-8 py-3 rounded-full min-w-[200px] text-center">
+            <Link href={`${locale}/#premium-products`} className="bg-[#CB7856] text-white font-semibold px-8 py-3 rounded-full min-w-[200px] text-center">
               {data?.buttonOneTitle}
             </Link>
             <Link href={`${locale}/get-in-touch`}  className="bg-white text-[#CB7856] font-semibold px-8 py-3 rounded-full border-2 border-[#CB7856] min-w-[200px] text-center">

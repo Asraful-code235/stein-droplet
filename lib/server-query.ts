@@ -24,7 +24,7 @@ export function createServerQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minute
+        staleTime: 0,
         gcTime: 10 * 60 * 1000, // 10 minutes
         refetchOnWindowFocus: false,
         refetchOnMount: false,
@@ -175,16 +175,19 @@ export async function prefetchCatalogueData(locale: string, slug?: string) {
     queryClient.prefetchQuery({
       queryKey: ['catalogues', locale],
       queryFn: () => getAllCatalogues(locale),
+      staleTime: 0,
     }),
     queryClient.prefetchQuery({
       queryKey: ['catalogue', 'heading', locale],
       queryFn: () => getCatalogueHeadingData({ locale }),
+      staleTime: 0,
     }),
     // If slug is specified, prefetch specific catalogue
     ...(slug ? [
       queryClient.prefetchQuery({
         queryKey: ['catalogue', 'category', locale, slug],
         queryFn: () => getCatalogueBySlug({ locale, category: slug }),
+        staleTime: 0,
       })
     ] : []),
   ]);

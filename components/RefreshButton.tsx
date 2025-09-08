@@ -5,17 +5,19 @@ import { useManualRefresh } from '@/hooks/useApi';
 
 interface RefreshButtonProps {
   locale: string;
-  type?: 'products' | 'categories' | 'projects' | 'all';
+  type?: 'products' | 'categories' | 'projects' | 'catalogues' | 'catalogue-category' | 'all';
+  categorySlug?: string;
   className?: string;
 }
 
 export default function RefreshButton({ 
   locale, 
   type = 'all', 
+  categorySlug,
   className = '' 
 }: RefreshButtonProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { refreshProducts, refreshCategories, refreshProjects, refreshAll } = useManualRefresh();
+  const { refreshProducts, refreshCategories, refreshProjects, refreshAll, refreshCatalogues, refreshCatalogueCategory } = useManualRefresh();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -30,6 +32,14 @@ export default function RefreshButton({
           break;
         case 'projects':
           refreshProjects(locale);
+          break;
+        case 'catalogues':
+          refreshCatalogues(locale);
+          break;
+        case 'catalogue-category':
+          if (categorySlug) {
+            refreshCatalogueCategory(locale, categorySlug);
+          }
           break;
         case 'all':
         default:
@@ -52,6 +62,8 @@ export default function RefreshButton({
       case 'products': return 'Refresh Products';
       case 'categories': return 'Refresh Categories';
       case 'projects': return 'Refresh Projects';
+      case 'catalogues': return 'Refresh Catalogues';
+      case 'catalogue-category': return 'Refresh This Catalogue';
       case 'all':
       default: return 'Refresh All Data';
     }

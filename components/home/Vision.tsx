@@ -29,7 +29,7 @@ const Collections = ({ data, details }: any) => {
   
 
   return (
-    <div className="relative h-fit lg:h-screen" ref={containerRef}>
+    <div id="premium-products" className="relative h-fit lg:h-screen" ref={containerRef}>
       <div ref={backgroundParallax.ref} className="absolute inset-0 -z-10">
         <div className="relative w-full h-[120%]">
           {details?.premiumBackgroundImage ? (

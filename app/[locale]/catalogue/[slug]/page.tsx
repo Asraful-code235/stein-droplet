@@ -1,18 +1,17 @@
-import DynamicCatalogue from "@/components/productsCatalogue/DynamicCatalogue";
-import ProductHeading from "@/components/productsCatalogue/ProductHeading";
-import { getCatalogueBySlug, getCatalogueHeadingData } from "@/lib/api";
 import React from "react";
+export const dynamic = 'force-dynamic';
+import HydratedPage from "@/components/HydratedPage";
+import { prefetchCatalogueData } from "@/lib/server-query";
+import CatalogueClient from "@/components/productsCatalogue/CatalogueClient";
 
 export default async function ProductDetailsPage({
   params: { slug, locale },
 }: any) {
-  const catalogues = await getCatalogueBySlug({ locale, category: slug });
-  const catalogueData = await getCatalogueHeadingData({ locale });
+  const dehydratedState = await prefetchCatalogueData(locale, slug);
 
   return (
-    <>
-      <ProductHeading data={catalogueData?.heading} />
-      <DynamicCatalogue data={catalogues} />
-    </>
+    <HydratedPage dehydratedState={dehydratedState}>
+      <CatalogueClient locale={locale} slug={slug} />
+    </HydratedPage>
   );
 }
