@@ -5,6 +5,7 @@ import {
   getAllCategories,
   getAllProducts,
   getProductById,
+  getProductBySlug,
   getProductsByCategorySlug,
   getAllProjects,
   getProjectsData,
@@ -53,6 +54,16 @@ export const useProductById = (locale: string, id: string) => {
     staleTime: 2 * 60 * 1000, // 2 minutes - individual products
     gcTime: 5 * 60 * 1000, // 5 minutes
     enabled: !!id,
+  });
+};
+
+export const useProductBySlug = (locale: string, slug: string) => {
+  return useQuery({
+    queryKey: ['product', locale, 'slug', slug],
+    queryFn: () => getProductBySlug({ locale, slug }),
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    enabled: !!slug,
   });
 };
 

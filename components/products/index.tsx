@@ -282,8 +282,8 @@ const Products = ({
               <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6'>
                 {products.map((product) => (
                   <Link
-                  href={`/${locale}/products/${product.id}`}
-                    key={product.id}
+                  href={`/${locale}/products/${product.slug}`}
+                    key={product.slug}
                     className='bg-white hover:cursor-pointer rounded-lg shadow overflow-hidden hover:shadow-lg transition'
                   >
                     <div className='h-[300px] bg-gray-200 relative'>

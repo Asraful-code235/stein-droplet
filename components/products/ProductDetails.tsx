@@ -11,45 +11,88 @@ import "swiper/css";
 import "swiper/css/thumbs";
 import "swiper/css/navigation";
 import { useParams, useRouter } from "next/navigation";
-import { useProductById } from "@/hooks/useApi";
+import { useProductBySlug } from "@/hooks/useApi";
 import { useTranslation } from "@/lib/i18n";
 
 export default function ProductDetails() {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [quantityM2, setQuantityM2] = useState<number>(1);
-  const [quantityBox, setQuantityBox] = useState<number>(1);
+  // Removed box logic per requirement
 
   const router = useRouter();
   const params = useParams();
-  const id = params.slug as string;
+  const slug = params.slug as string;
   const locale = params.locale as string;
   const { t } = useTranslation();
 
   // Use TanStack Query for real-time data
-  const { data: product, isLoading, error } = useProductById(locale, id);
+  const { data: product, isLoading, error } = useProductBySlug(locale, slug);
 
-  // Set initial size when product loads
+  // Set initial size when product loads (supports string, flat, grouped)
   useEffect(() => {
-    if (product?.variations?.sizes?.length > 0) {
-      const firstSize = product!.variations.sizes[0];
-      if (firstSize.sizes?.length > 0 && !selectedSize) {
-        setSelectedSize(firstSize.sizes[0].size);
+    const groups = (product as any)?.variations?.sizes;
+    if (!selectedSize && Array.isArray(groups) && groups.length > 0) {
+      const firstGroup = groups[0];
+      let firstSizeLabel: string | undefined;
+      if (typeof firstGroup === "string") {
+        firstSizeLabel = firstGroup;
+      } else if (Array.isArray(firstGroup?.sizes) && firstGroup.sizes.length > 0) {
+        firstSizeLabel = firstGroup.sizes[0]?.size || firstGroup.sizes[0]?.m2Price;
+      } else if (firstGroup?.size || firstGroup?.m2Price) {
+        firstSizeLabel = firstGroup.size || firstGroup.m2Price;
       }
+      if (firstSizeLabel) setSelectedSize(firstSizeLabel);
     }
   }, [product, selectedSize]);
 
   const getCurrentSizeDetails = () => {
-    if (!product?.variations?.sizes) return null;
+    const groups = (product as any)?.variations?.sizes;
+    if (!Array.isArray(groups)) return null;
+    for (const group of groups) {
+      if (Array.isArray(group?.sizes)) {
+        if (group.sizes.some((s: any) => s?.size === selectedSize || s?.m2Price === selectedSize)) return group;
+      } else if (group?.size === selectedSize || group?.m2Price === selectedSize) {
+        return group;
+      }
+    }
+    return null;
+  };
 
-    return product.variations.sizes.find((sizeGroup: any) =>
-      sizeGroup.sizes.some((size: any) => size.size === selectedSize)
-    );
+  // Find the selected size item (supports flat and grouped)
+  const getSelectedSizeItem = () => {
+    const groups = (product as any)?.variations?.sizes;
+    if (!Array.isArray(groups)) return null;
+    for (const group of groups) {
+      if (Array.isArray(group?.sizes)) {
+        const match = group.sizes.find((s: any) => s?.size === selectedSize || s?.m2Price === selectedSize);
+        if (match) return match;
+      } else if (group?.size === selectedSize || group?.m2Price === selectedSize) {
+        return group;
+      }
+    }
+    return null;
   };
 
   const currentSize = getCurrentSizeDetails();
-  const pricePerM2 = currentSize?.m2Price || 0;
-  const pricePerBox = currentSize?.boxPrice || 0;
+  const selectedSizeItem = getSelectedSizeItem();
+  // Prefer numeric price fields only; do NOT treat label fields like m2Price (e.g., "44cm") as numeric
+  const pricePerM2Raw = (
+    selectedSizeItem?.pricePerM2 ?? selectedSizeItem?.pricePerM2Number ??
+    currentSize?.pricePerM2 ?? currentSize?.pricePerM2Number ??
+    product?.pricePerM2 ?? product?.price ?? 0
+  );
+  const pricePerM2Num = (() => {
+    if (typeof pricePerM2Raw === "number") return pricePerM2Raw;
+    if (typeof pricePerM2Raw === "string") {
+      // Ignore strings that contain letters (labels like "44cm")
+      if (/[a-zA-Z]/.test(pricePerM2Raw)) return 0;
+      const match = pricePerM2Raw.match(/^[0-9]+(?:\.[0-9]+)?$/);
+      return match ? parseFloat(pricePerM2Raw) : 0;
+    }
+    return 0;
+  })();
+  // No box pricing
 
   // ✅ Robust area calculator
   const calculateAreaPerBox = (size: string): number => {
@@ -67,10 +110,22 @@ export default function ProductDetails() {
     }
   };
 
-  const areaPerBox = calculateAreaPerBox(selectedSize);
-  const calculatedM2 = (areaPerBox * quantityBox).toFixed(3);
-  const totalPriceM2 = (quantityM2 * pricePerM2).toFixed(2);
-  const totalPriceBox = (quantityBox * pricePerBox).toFixed(2);
+  // Calculated M2 equals the input value as there is no box logic
+  const calculatedM2 = Number.isFinite(quantityM2) ? quantityM2.toFixed(2) : "0.00";
+  const totalPriceM2 = (quantityM2 * (pricePerM2Num || 0)).toFixed(2);
+
+  // Debug logs: available sizes and active pricing inputs
+  useEffect(() => {
+    if (product?.variations?.sizes) {
+      // eslint-disable-next-line no-console
+      console.log("Available sizes (raw):", product.variations.sizes);
+    }
+  }, [product]);
+
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log("Selected size:", selectedSize, "Current size group:", currentSize, "Selected item:", selectedSizeItem, "pricePerM2:", pricePerM2Num);
+  }, [selectedSize, currentSize, selectedSizeItem, pricePerM2Num]);
 
   const Swiper = SwiperOriginal as React.FC<
     SwiperProps & { children?: React.ReactNode }
@@ -214,27 +269,34 @@ export default function ProductDetails() {
               {t("product.availableSizes")}
             </p>
             <div className="flex flex-wrap gap-2">
-              {product.variations?.sizes?.flatMap((group: any) =>
-                group.sizes.map((size: any, i: number) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedSize(size.size)}
-                    className={`border px-3 py-1 rounded font-sans transition ${
-                      selectedSize === size.size
-                        ? "bg-white text-[#CB7856] font-semibold"
-                        : "text-white hover:text-[#fff] hover:font-semibold"
-                    }`}
-                  >
-                    {size.size}
-                  </button>
-                ))
-              )}
+              {Array.isArray((product as any)?.variations?.sizes)
+                ? (product as any).variations.sizes.flatMap((group: any, gi: number) => {
+                    const items = typeof group === "string" ? [group] : (Array.isArray(group?.sizes) ? group.sizes : [group]);
+                    return items.map((size: any, i: number) => {
+                      const label = typeof size === "string" ? size : (size?.size || size?.m2Price);
+                      if (!label) return null;
+                      return (
+                        <button
+                          key={`${label}-${gi}-${i}`}
+                          onClick={() => setSelectedSize(label)}
+                          className={`border px-3 py-1 rounded font-sans transition ${
+                            selectedSize === label
+                              ? "bg-white text-[#CB7856] font-semibold"
+                              : "text-white hover:text-[#fff] hover:font-semibold"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    });
+                  })
+                : null}
             </div>
           </div>
 
           <div className="text-sm space-y-1 text-white font-sans">
             <p>
-              <strong>{t("product.byM2")}:</strong> € {pricePerM2}
+              <strong>{t("product.byM2")}:</strong> € {pricePerM2Num.toFixed(2)}
             </p>
           </div>
 
@@ -263,11 +325,7 @@ export default function ProductDetails() {
                 />
               </div>
 
-              {/* Calculated M2 from box */}
-              <div className="text-sm text-white font-inter flex justify-between">
-                <strong>{t("product.quantityM2Calculated")}:</strong>
-                <p>{quantityM2.toFixed(2)}</p>
-              </div>
+              {/* Removed redundant calculated M2 row; input already represents m² */}
 
               {/* Box Quantity */}
               {/* <div className="flex justify-between items-center">
